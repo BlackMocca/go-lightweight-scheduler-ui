@@ -24,3 +24,6 @@ test:
 
 genproto:
 	protoc -I . --go_out=plugins=grpc:proto/ proto/*.proto
+
+docker-build-prod:
+	docker build -f Dockerfile-production -t godflow-ui . 
