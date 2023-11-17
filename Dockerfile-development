@@ -1,5 +1,7 @@
 FROM golang:1.19
 
+RUN api-get update && apt-get install lsof
+
 ARG app_name
 ARG build_number
 ARG version

@@ -14,6 +14,8 @@ services:
       - 8080:8080
     volumes:
       - .:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
+      - ./pages:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/pages
+      - ./components:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/components
       - ./build:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/build
     
 networks:

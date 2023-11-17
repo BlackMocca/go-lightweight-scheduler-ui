@@ -20,11 +20,15 @@ func (h *Home) Render() app.UI {
 		),
 		app.P().Body(
 			app.Input().
+				Class("pure-input-1-3").
 				Type("text").
 				Value(h.name).
 				Placeholder("What is your name?").
 				AutoFocus(true).
 				OnInput(h.ValueTo(&h.name)),
+		),
+		app.Form().Class("pure-form").Body(
+			app.Input().Class("pure-input-1").Type("text"),
 		),
 	)
 }

@@ -4,6 +4,11 @@ build:
 	go build -o ./build/app main.go
 
 run:
+	@if lsof -t -i :8080; \
+    then \
+        kill -9 $$(lsof -t -i:8080); \
+    fi
+	
 	cd build && ./app
 
 clean:

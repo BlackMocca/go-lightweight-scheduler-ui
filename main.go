@@ -33,9 +33,13 @@ var (
 	App = &app.Handler{
 		Name:        "Hello",
 		Description: "An Hello World! example",
-		// Styles: []string{
-		// 	"/styles/pure-css/pure-min.css",
-		// },
+		Styles: []string{
+			"/web/styles/pure-css/pure-min.css",
+		},
+		CacheableResources: []string{
+			"/web/styles/pure-css/pure-min.css",
+		},
+		// AutoUpdateInterval: time.Duration(30 * time.Second),
 	}
 )
 
