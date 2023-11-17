@@ -1,0 +1,41 @@
+FROM golang:1.19
+
+ARG app_name
+
+RUN mkdir -p /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
+WORKDIR /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
+
+ENV GO111MODULE=on
+ENV ADDR=0.0.0.0
+ENV TZ=Asia/Bangkok
+
+# Copy app service 
+COPY go.mod .
+COPY . .
+
+RUN go mod tidy     
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o   /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/build/app main.go
+
+FROM alpine:latest 
+RUN apk --no-cache add ca-certificates
+WORKDIR /usr/app
+
+ARG app_name
+ARG build_number
+ARG version
+ENV env_build_number=${build_number}
+ENV env_version=${version}
+ENV ADDR=0.0.0.0
+ENV TZ=Asia/Bangkok
+
+COPY --from=0 /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/build/app .
+COPY --from=0 /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/assets assets
+COPY --from=0 /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/migrations migrations
+COPY --from=0 /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/config config
+
+EXPOSE 3000
+EXPOSE 3100
+
+CMD ["./app"]  
+
