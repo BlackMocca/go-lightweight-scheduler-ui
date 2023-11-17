@@ -2,11 +2,41 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"net/http"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/pages"
-	"github.com/labstack/echo/v4"
-	echoMiddl "github.com/labstack/echo/v4/middleware"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+)
+
+const (
+	branding = `
+________           .___ _____.__                 
+/  _____/  ____   __| _// ____\  |   ______  _  __
+/   \  ___ /  _ \ / __ |\   __\|  |  /  _ \ \/ \/ /
+\    \_\  (  <_> ) /_/ | |  |  |  |_(  <_> )     / 
+\______  /\____/\____ | |__|  |____/\____/ \/\_/  
+		\/            \/                           
+
+------------------------------------------------------------------------
+http server started on port :%d
+------------------------------------------------------------------------
+`
+)
+
+const (
+	port = 8080
+)
+
+var (
+	App = &app.Handler{
+		Name:        "Hello",
+		Description: "An Hello World! example",
+		// Styles: []string{
+		// 	"/styles/pure-css/pure-min.css",
+		// },
+	}
 )
 
 func main() {
@@ -15,14 +45,16 @@ func main() {
 	app.Route("/", &pages.Home{})
 	app.RunWhenOnBrowser()
 
-	e := echo.New()
-	e.Pre(echoMiddl.RemoveTrailingSlash())
-	defer e.Shutdown(ctx)
-
 	// HTTP routing:
-	e.GET("/", echo.WrapHandler(&app.Handler{
-		Name:        "Hello",
-		Description: "An Hello World! example",
-	}))
-	e.Logger.Fatal(e.Start(":8080"))
+	http.Handle("/", App)
+
+	start(ctx, port)
+}
+
+func start(ctx context.Context, port int) {
+	portStr := fmt.Sprintf(":%d", port)
+	fmt.Printf(branding, port)
+	if err := http.ListenAndServe(portStr, nil); err != nil {
+		log.Fatal(err)
+	}
 }

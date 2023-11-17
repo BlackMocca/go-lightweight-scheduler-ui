@@ -11,11 +11,11 @@ type Home struct {
 func (h *Home) Render() app.UI {
 	return app.Div().Body(
 		app.H1().Body(
-			app.Text("Hello, "),
+			app.Text("Hello2, "),
 			app.If(h.name != "",
 				app.Text(h.name),
 			).Else(
-				app.Text("World!"),
+				app.Text("Else!"),
 			),
 		),
 		app.P().Body(
@@ -24,7 +24,7 @@ func (h *Home) Render() app.UI {
 				Value(h.name).
 				Placeholder("What is your name?").
 				AutoFocus(true).
-				OnChange(h.ValueTo(&h.name)),
+				OnInput(h.ValueTo(&h.name)),
 		),
 	)
 }

@@ -18,10 +18,11 @@ WORKDIR /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
 COPY . . 
 RUN go get -u github.com/githubnemo/CompileDaemon
 RUN go install github.com/githubnemo/CompileDaemon
-RUN go mod tidy     
+RUN go mod tidy    
 
-RUN  go build -o  /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/tmp/app main.go
+RUN GOARCH=wasm GOOS=js go build -o ./build/web/app.wasm main.go
+RUN go build -o ./build/app main.go
 
 EXPOSE 8080
 
-ENTRYPOINT CompileDaemon -include=go.mod -log-prefix=false -color=true -build="go build -o ./tmp/app main.go" -command="./tmp/app" 
+ENTRYPOINT CompileDaemon -include=go.mod -log-prefix=false -color=true -build="make -B build" -command="make -B run" 

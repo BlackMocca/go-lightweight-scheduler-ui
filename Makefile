@@ -1,3 +1,14 @@
+build:
+	mkdir -p build/web/styles && cp -R styles build/web
+	GOARCH=wasm GOOS=js go build -o ./build/web/app.wasm main.go
+	go build -o ./build/app main.go
+
+run:
+	cd build && ./app
+
+clean:
+	go clean ./...
+
 mockery:
 	mockery --all --dir service/$(service) --output service/$(service)/mocks
 
