@@ -2,6 +2,12 @@
     margin: 0;
     width: 100vw;
     height: 100vh;
+    display: flex;
+}
+
+.contentContainer{
+    width: 100vw;
+    display: flex;
 }
 
 .navbar{
@@ -13,8 +19,12 @@
     flex-direction: column;
 }
 
+.menuLogoContainer{
+    text-align: center;
+}
+
 .menuLogo{
-    width: 100%;
+    width: 90%;
     padding: 15px;
 }
 
@@ -26,7 +36,7 @@
 .navbar .pure-menu-link{
     color: #fff;
     font-size: 125%;
-    letter-spacing: 0.1em;
+    /* letter-spacing: 0.1em; */
 }
 .navbar .pure-menu-link:hover{
     background-color: rgba(119,119, 119, 0.6);
