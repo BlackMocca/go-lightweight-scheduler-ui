@@ -1,5 +1,5 @@
 build:
-	mkdir -p build/web/styles && cp -R styles build/web
+	mkdir -p build/web/resources && cp -r resources build/web
 	GOARCH=wasm GOOS=js go build -o ./build/web/app.wasm main.go
 	go build -o ./build/app main.go
 

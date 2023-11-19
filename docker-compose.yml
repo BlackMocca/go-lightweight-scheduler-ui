@@ -15,7 +15,8 @@ services:
     volumes:
       - .:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
       - ./pages:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/pages
-      - ./components:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/components
+      - ./domain:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/domain
+      - ./resources:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/resources
       - ./build:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/build
     
 networks:

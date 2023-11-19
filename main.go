@@ -31,13 +31,20 @@ const (
 
 var (
 	App = &app.Handler{
-		Name:        "Hello",
-		Description: "An Hello World! example",
+		Name:        "Godflow",
+		Title:       "Godflow",
+		Description: "Make to Easy ETL",
+		Icon: app.Icon{
+			SVG: "/web/resources/assets/logo/logo-color.svg",
+		},
 		Styles: []string{
-			"/web/styles/pure-css/pure-min.css",
+			"/web/resources/styles/pure-css/pure-min.css",
+			"/web/resources/styles/app.css",
 		},
 		CacheableResources: []string{
-			"/web/styles/pure-css/pure-min.css",
+			"/web/resources/styles/pure-css/pure-min.css",
+			"/web/resources/styles/app.css",
+			"/web/resources/assets/logo.svg",
 		},
 		// AutoUpdateInterval: time.Duration(30 * time.Second),
 	}
@@ -46,7 +53,7 @@ var (
 func main() {
 	ctx := context.Background()
 	// Components routing:
-	app.Route("/", &pages.Home{})
+	app.Route("/", &pages.App{})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:
