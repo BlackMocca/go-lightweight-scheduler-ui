@@ -38,7 +38,9 @@ func (f *FormConnection) Render() app.UI {
 	return app.Div().Class("pure-form pure-form-aligned").OnKeyPress(func(ctx app.Context, e app.Event) {
 		if e.Value.Get("key").String() == "Enter" {
 			// fix client summit
-			f.submit(ctx, e)
+			if buttonElem := app.Window().GetElementByID("form-conntection-submit"); buttonElem != nil {
+				buttonElem.Call("click")
+			}
 		}
 	}).Body(
 		app.FieldSet().Body(
@@ -49,7 +51,7 @@ func (f *FormConnection) Render() app.UI {
 					Type("text").
 					Placeholder("http://127.0.0.1:3000").
 					Required(true).
-					OnChange(f.onChangeHost),
+					OnInput(f.onChangeHost),
 				app.Span().
 					Class("pure-form-message-inline").
 					Text("This is a required field."),
@@ -61,7 +63,7 @@ func (f *FormConnection) Render() app.UI {
 					Type("text").
 					Placeholder("scheduler").
 					Required(true).
-					OnChange(f.onChangeHost),
+					OnInput(f.onChangeHost),
 				app.Span().
 					Class("pure-form-message-inline").
 					Text("This is a required field."),
@@ -72,7 +74,7 @@ func (f *FormConnection) Render() app.UI {
 					ID("password").
 					Type("password").
 					Required(true).
-					OnChange(f.onChangeHost),
+					OnInput(f.onChangeHost),
 				app.Span().
 					Class("pure-form-message-inline").
 					Text("This is a required field."),
