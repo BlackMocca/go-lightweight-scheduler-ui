@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -37,7 +38,7 @@ func (f *FormConnection) submit(ctx app.Context, e app.Event) {
 func (f *FormConnection) Render() app.UI {
 	return app.Div().Class("pure-form pure-form-aligned").OnKeyPress(func(ctx app.Context, e app.Event) {
 		if e.Value.Get("key").String() == "Enter" {
-			// fix client summit
+			time.Sleep(100 * time.Millisecond)
 			if buttonElem := app.Window().GetElementByID("form-conntection-submit"); buttonElem != nil {
 				buttonElem.Call("click")
 			}
@@ -51,7 +52,7 @@ func (f *FormConnection) Render() app.UI {
 					Type("text").
 					Placeholder("http://127.0.0.1:3000").
 					Required(true).
-					OnInput(f.onChangeHost),
+					OnChange(f.onChangeHost),
 				app.Span().
 					Class("pure-form-message-inline").
 					Text("This is a required field."),
@@ -63,7 +64,7 @@ func (f *FormConnection) Render() app.UI {
 					Type("text").
 					Placeholder("scheduler").
 					Required(true).
-					OnInput(f.onChangeHost),
+					OnChange(f.onChangeHost),
 				app.Span().
 					Class("pure-form-message-inline").
 					Text("This is a required field."),
@@ -74,7 +75,7 @@ func (f *FormConnection) Render() app.UI {
 					ID("password").
 					Type("password").
 					Required(true).
-					OnInput(f.onChangeHost),
+					OnChange(f.onChangeHost),
 				app.Span().
 					Class("pure-form-message-inline").
 					Text("This is a required field."),
