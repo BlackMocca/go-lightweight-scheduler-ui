@@ -1,6 +1,10 @@
 FROM golang:1.19
 
-RUN apt-get update && apt-get install lsof
+RUN apt-get update && apt-get install -y wget
+
+RUN	wget https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64 \
+    && chmod +x tailwindcss-linux-arm64 \
+    && mv tailwindcss-linux-arm64 /usr/local/bin/tailwindcss
 
 ARG app_name
 ARG build_number
@@ -27,4 +31,5 @@ RUN go build -o ./build/app main.go
 
 EXPOSE 8080
 
+RUN cd tailwind && tailwindcss -i ./tailwind-min.css -o ../resources/styles/tailwind/tailwind-min.css --watch > /dev/null 2>&1 &
 ENTRYPOINT CompileDaemon -include=go.mod -log-prefix=false -color=true --exclude-dir=resources -build="make -B build" -command="make -B run" 

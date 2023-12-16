@@ -38,11 +38,11 @@ var (
 			SVG: "/web/resources/assets/logo/logo-color.svg",
 		},
 		Styles: []string{
-			"/web/resources/styles/pure-css/pure-min.css",
+			"/web/resources/styles/tailwind/tailwind-min.css",
 			"/web/resources/styles/app.css",
 		},
 		CacheableResources: []string{
-			"/web/resources/styles/pure-css/pure-min.css",
+			"/web/resources/styles/tailwind/tailwind-min.css",
 			"/web/resources/styles/app.css",
 			"/web/resources/assets/logo.svg",
 		},
@@ -53,7 +53,7 @@ var (
 func main() {
 	ctx := context.Background()
 	// Components routing:
-	app.Route("/", &pages.App{})
+	app.Route("/", &pages.Tailwind{})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:

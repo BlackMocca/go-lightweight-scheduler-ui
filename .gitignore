@@ -1,5 +1,5 @@
 tmp/*
 build/*
 .env
-
+tailwind/node_modules
 .DS_STORE

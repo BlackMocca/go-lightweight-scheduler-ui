@@ -11,6 +11,15 @@ run:
 	
 	cd build && ./app
 
+
+install-tailwind:
+	wget https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+	chmod +x tailwindcss-macos-arm64
+	mv tailwindcss-macos-arm64 $(GOPATH)/bin/tailwindcss
+
+build-tailwind:
+	cd tailwind && tailwindcss -i ./tailwind-min.css -o ../resources/styles/tailwind/tailwind-min.css --minify
+
 clean:
 	go clean ./...
 
