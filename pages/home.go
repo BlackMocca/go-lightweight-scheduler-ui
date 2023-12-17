@@ -18,7 +18,7 @@ func (h *Home) Render() app.UI {
 		&components.Nav{},
 		app.Div().Class("flext flex-col w-full").Body(
 			components.NewNavHeader(navHeaderTitle),
-			app.Div().Class("w-6/12 bg-red").Body(
+			app.Div().Class().Body(
 				&components.FormConnection{},
 			),
 		),

@@ -87,62 +87,97 @@ func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 }
 
 func (f *FormConnection) Render() app.UI {
-	return app.Div().Class("").OnKeyPress(f.onKeypress).Body(
-		app.FieldSet().Body(
-			app.Div().Class("").Body(
-				app.Label().For("favourites").Text("Favourites Name"),
+	var printErr = func(err error) string {
+		if err == nil {
+			return ""
+		}
+		return err.Error()
+	}
+	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
+		app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
+			/* favourite name */
+			app.Div().Class("col-span-1 flex items-center").Body(
+				app.Label().Class().For("favourites").Text("Favourites Name"),
+			),
+			app.Div().Class("col-span-2 flex items-center").Body(
 				app.Input().
 					ID("favourites").
+					Class("w-full leading-6 border border-gray-300 px-4 py-1 rounded-md focus:border-blue-500 focus:outline-none").
 					Type("text").
 					Required(false).
 					OnChange(f.onChangeInput),
 			),
-			app.Div().Class("").Body(
-				app.Label().For("host").Text("Host"),
+			app.Div().Class("col-span-1 flex items-center").Body(
+				app.Span().
+					Class("whitespace-normal break-words").
+					Text(printErr(f.validatorInput.hostErr)),
+			),
+
+			/* host */
+			app.Div().Class("col-span-1 flex items-center").Body(
+				app.Label().Class().For("host").Text("Host"),
+			),
+			app.Div().Class("col-span-2 flex items-center").Body(
 				app.Input().
 					ID("host").
+					Class("w-full leading-6 border border-gray-300 px-4 py-1 rounded-md focus:border-blue-500 focus:outline-none").
 					Type("text").
 					Placeholder("http://127.0.0.1:3000").
 					Required(true).
 					OnChange(f.onChangeInput),
-				app.If(f.validatorInput.hostErr != nil,
-					app.Span().
-						Class("").
-						Text(f.validatorInput.hostErr),
-				),
 			),
-			app.Div().Class("").Body(
-				app.Label().For("username").Text("Username"),
-				app.Input().
-					ID("username").
-					Type("text").
-					Placeholder("scheduler").
-					Required(true).
-					OnChange(f.onChangeInput),
-				app.If(f.validatorInput.usernameErr != nil,
-					app.Span().
-						Class("").
-						Text(f.validatorInput.usernameErr),
-				),
+			app.Div().Class("col-span-1 flex items-center").Body(
+				app.Span().
+					Class("").
+					Text(printErr(f.validatorInput.hostErr)),
 			),
-			app.Div().Class("").Body(
-				app.Label().For("password").Text("Password"),
-				app.Input().
-					ID("password").
-					Type("password").
-					Required(true).
-					OnChange(f.onChangeInput),
-				app.If(f.validatorInput.passwordErr != nil,
-					app.Span().
-						Class("").
-						Text(f.validatorInput.passwordErr),
-				),
-			),
-			app.Div().Class("").Body(
-				app.Button().ID("form-conntection-submit").Class("").
-					Type("Submit").Text("Submit").
-					OnClick(f.submit),
-			),
+
+		// app.Div().Class("").Body(
+		// 	app.Label().For("host").Text("Host"),
+		// 	app.Input().
+		// 		ID("host").
+		// 		Type("text").
+		// 		Placeholder("http://127.0.0.1:3000").
+		// 		Required(true).
+		// 		OnChange(f.onChangeInput),
+		// app.If(f.validatorInput.hostErr != nil,
+		// 	app.Span().
+		// 		Class("").
+		// 		Text(f.validatorInput.hostErr),
+		// ),
+		// ),
+		// app.Div().Class("").Body(
+		// 	app.Label().For("username").Text("Username"),
+		// 	app.Input().
+		// 		ID("username").
+		// 		Type("text").
+		// 		Placeholder("scheduler").
+		// 		Required(true).
+		// 		OnChange(f.onChangeInput),
+		// 	app.If(f.validatorInput.usernameErr != nil,
+		// 		app.Span().
+		// 			Class("").
+		// 			Text(f.validatorInput.usernameErr),
+		// 	),
+		// ),
+		// app.Div().Class("").Body(
+		// 	app.Label().For("password").Text("Password"),
+		// 	app.Input().
+		// 		ID("password").
+		// 		Type("password").
+		// 		Required(true).
+		// 		OnChange(f.onChangeInput),
+		// 	app.If(f.validatorInput.passwordErr != nil,
+		// 		app.Span().
+		// 			Class("").
+		// 			Text(f.validatorInput.passwordErr),
+		// 	),
+		// ),
+		),
+		app.Div().Class("flex flex-row gap-2").Body(
+			app.Button().ID("form-conntection-submit").Class("").
+				Type("Submit").Text("Submit").
+				OnClick(f.submit),
 		),
 	)
 }

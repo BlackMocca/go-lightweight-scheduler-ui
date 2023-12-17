@@ -23,7 +23,7 @@ func (n *Nav) Render() app.UI {
 			app.Img().Class("w-6").Src(iconFavourite),
 			app.P().Class("text-base").Text("Saved Connections"),
 		),
-		app.Div().Class("text-md text-secondary-base").Body(
+		app.Div().Class("text-xl text-secondary-base").Body(
 			app.Ul().Class("").Body(
 				app.Li().Class("p-2 hover:bg-secondary-base hover:bg-opacity-25 hover:cursor-pointer").Body(
 					app.A().Class("").Href("#").Text("Dag"),

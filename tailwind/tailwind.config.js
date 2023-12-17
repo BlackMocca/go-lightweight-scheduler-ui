@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
+var defaultColorConfig = require('./tailwind.config-color.js')
+
 module.exports = {
+  mode: 'aot',
   content: [
     "../domain/**.go",
     "../domain/**/*.go",
@@ -35,7 +38,10 @@ module.exports = {
       secondary: {
         base: "#FFFAFA"
       },
-      red: "red"
+      red: "red",
+      // gray: {
+      //   "300": "#d1d5db"
+      // }
     },
     extend: {
       fontFamily: {
@@ -44,6 +50,9 @@ module.exports = {
       borderWidth: {
         '0.5': '0.5px',
       },
+      colors:{
+        ...defaultColorConfig.theme.colors
+      }
     }
   },
   plugins: [],
