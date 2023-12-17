@@ -1,6 +1,6 @@
 FROM golang:1.19
 
-RUN apt-get update && apt-get install -y wget
+RUN apt-get update && apt-get install -y lsof && apt-get install -y wget
 
 RUN	wget https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64 \
     && chmod +x tailwindcss-linux-arm64 \
