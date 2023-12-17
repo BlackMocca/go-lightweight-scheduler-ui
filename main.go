@@ -42,7 +42,7 @@ var (
 		},
 		CacheableResources: []string{
 			// "/web/resources/styles/tailwind/tailwind-min.css",
-			"/web/resources/assets/logo.svg",
+			// "/web/resources/assets/logo.svg",
 		},
 		Fonts: []string{
 			"/web/resources/fonts/Kanit-Regular.ttf",

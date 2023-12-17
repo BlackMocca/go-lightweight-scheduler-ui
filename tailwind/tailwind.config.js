@@ -35,10 +35,14 @@ module.exports = {
       secondary: {
         base: "#FFFAFA"
       },
+      red: "red"
     },
     extend: {
       fontFamily: {
         sans: ['Kanit-Regular', 'Kanit-Light', 'Kanit-Bold']
+      },
+      borderWidth: {
+        '0.5': '0.5px',
       },
     }
   },

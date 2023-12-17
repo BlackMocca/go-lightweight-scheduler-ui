@@ -87,9 +87,9 @@ func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 }
 
 func (f *FormConnection) Render() app.UI {
-	return app.Div().Class("pure-form pure-form-aligned").OnKeyPress(f.onKeypress).Body(
+	return app.Div().Class("").OnKeyPress(f.onKeypress).Body(
 		app.FieldSet().Body(
-			app.Div().Class("pure-control-group").Body(
+			app.Div().Class("").Body(
 				app.Label().For("favourites").Text("Favourites Name"),
 				app.Input().
 					ID("favourites").
@@ -97,7 +97,7 @@ func (f *FormConnection) Render() app.UI {
 					Required(false).
 					OnChange(f.onChangeInput),
 			),
-			app.Div().Class("pure-control-group").Body(
+			app.Div().Class("").Body(
 				app.Label().For("host").Text("Host"),
 				app.Input().
 					ID("host").
@@ -107,11 +107,11 @@ func (f *FormConnection) Render() app.UI {
 					OnChange(f.onChangeInput),
 				app.If(f.validatorInput.hostErr != nil,
 					app.Span().
-						Class("pure-form-message-inline").
+						Class("").
 						Text(f.validatorInput.hostErr),
 				),
 			),
-			app.Div().Class("pure-control-group").Body(
+			app.Div().Class("").Body(
 				app.Label().For("username").Text("Username"),
 				app.Input().
 					ID("username").
@@ -121,11 +121,11 @@ func (f *FormConnection) Render() app.UI {
 					OnChange(f.onChangeInput),
 				app.If(f.validatorInput.usernameErr != nil,
 					app.Span().
-						Class("pure-form-message-inline").
+						Class("").
 						Text(f.validatorInput.usernameErr),
 				),
 			),
-			app.Div().Class("pure-control-group").Body(
+			app.Div().Class("").Body(
 				app.Label().For("password").Text("Password"),
 				app.Input().
 					ID("password").
@@ -134,12 +134,12 @@ func (f *FormConnection) Render() app.UI {
 					OnChange(f.onChangeInput),
 				app.If(f.validatorInput.passwordErr != nil,
 					app.Span().
-						Class("pure-form-message-inline").
+						Class("").
 						Text(f.validatorInput.passwordErr),
 				),
 			),
-			app.Div().Class("pure-controls").Body(
-				app.Button().ID("form-conntection-submit").Class("pure-button pure-button-primary").
+			app.Div().Class("").Body(
+				app.Button().ID("form-conntection-submit").Class("").
 					Type("Submit").Text("Submit").
 					OnClick(f.submit),
 			),
