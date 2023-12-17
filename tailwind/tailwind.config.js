@@ -2,7 +2,9 @@
 module.exports = {
   content: [
     "../domain/**.go",
+    "../domain/**/*.go",
     "../pages/**.go",
+    "../pages/**/*.go",
   ],
   theme: {
     screens: {
@@ -18,25 +20,26 @@ module.exports = {
       kanitBold: "Kanit-Bold",
     },
     fontSize: {
-      'xs': '0.75rem',   
-      'sm': '0.875rem', 
-      'base': '1rem',    
-      'lg': '1.125rem',  
-      'xl': '1.25rem',   
-      '2xl': '1.5rem',  
+      sm: '0.8rem',
+      base: '1rem',
+      xl: '1.25rem',
+      '2xl': '1.563rem',
+      '3xl': '1.953rem',
+      '4xl': '2.441rem',
+      '5xl': '3.052rem',
     },
     colors: {
       primary: {
         base: "#264653"
       },
       secondary: {
-        base: "#f0fdfa"
-      }
+        base: "#FFFAFA"
+      },
     },
     extend: {
       fontFamily: {
         sans: ['Kanit-Regular', 'Kanit-Light', 'Kanit-Bold']
-      }
+      },
     }
   },
   plugins: [],

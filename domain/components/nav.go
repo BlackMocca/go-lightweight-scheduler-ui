@@ -13,17 +13,17 @@ type Nav struct {
 }
 
 func (n *Nav) Render() app.UI {
-	return app.Div().Class("navbar").Body(
-		app.Div().Class("menuLogoContainer").Body(
-			app.Img().Class("menuLogo").Src(logo),
+	return app.Div().Class("flex flex-col h-screen w-2/12 bg-primary-base shadow-lg").Body(
+		app.Div().Class("w-full h-32 p-4 text-center").Body(
+			app.Img().Class("w-full h-full").Src(logo),
 		),
-		app.Div().Class("pure-menu").Body(
-			app.Ul().Class("pure-menu-list").Body(
-				app.Li().Text("pure-menu-item").Body(
-					app.A().Class("pure-menu-link").Href("#").Text("Dag"),
+		app.Div().Class("text-xl text-secondary-base").Body(
+			app.Ul().Class("").Body(
+				app.Li().Class("p-2 hover:bg-secondary-base hover:bg-opacity-25").Body(
+					app.A().Class("").Href("#").Text("Dag"),
 				),
-				app.Li().Text("pure-menu-item").Body(
-					app.A().Class("pure-menu-link").Href("#").Text("Job"),
+				app.Li().Class("p-2 hover:bg-secondary-base hover:bg-opacity-25").Body(
+					app.A().Class("").Href("#").Text("Job"),
 				),
 			),
 		),
