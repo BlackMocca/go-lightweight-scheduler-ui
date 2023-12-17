@@ -39,12 +39,15 @@ var (
 		},
 		Styles: []string{
 			"/web/resources/styles/tailwind/tailwind-min.css",
-			"/web/resources/styles/app.css",
 		},
 		CacheableResources: []string{
-			"/web/resources/styles/tailwind/tailwind-min.css",
-			"/web/resources/styles/app.css",
+			// "/web/resources/styles/tailwind/tailwind-min.css",
 			"/web/resources/assets/logo.svg",
+		},
+		Fonts: []string{
+			"/web/resources/fonts/Kanit-Regular.ttf",
+			"/web/resources/fonts/Kanit-Light.ttf",
+			"/web/resources/fonts/Kanit-Bold.ttf",
 		},
 		// AutoUpdateInterval: time.Duration(30 * time.Second),
 	}
@@ -53,7 +56,7 @@ var (
 func main() {
 	ctx := context.Background()
 	// Components routing:
-	app.Route("/", &pages.Tailwind{})
+	app.Route("/", &pages.App{})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:

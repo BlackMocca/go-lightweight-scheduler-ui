@@ -1,4 +1,5 @@
 build:
+	cd tailwind && tailwindcss -i ./tailwind-min.css -o ../resources/styles/tailwind/tailwind-min.css
 	mkdir -p build/web/resources && cp -r resources build/web
 	GOARCH=wasm GOOS=js go build -o ./build/web/app.wasm main.go
 	go build -o ./build/app main.go

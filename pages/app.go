@@ -11,5 +11,5 @@ type App struct {
 }
 
 func (h *App) Render() app.UI {
-	return app.Div().ID("root").Body(&Home{})
+	return app.Div().Class("container").ID("root").Body(&Home{})
 }
