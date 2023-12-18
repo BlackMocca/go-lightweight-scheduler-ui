@@ -1,6 +1,10 @@
-package components
+package layouts
 
 import "github.com/maxence-charriere/go-app/v9/pkg/app"
+
+type NavHeaderProp struct {
+	Title string
+}
 
 type NavHeader struct {
 	app.Compo
@@ -9,9 +13,10 @@ type NavHeader struct {
 	}
 }
 
-func NewNavHeader(title string) *NavHeader {
-	n := &NavHeader{}
-	n.Prop.Title = title
+func NewNavHeader(prop NavHeaderProp) *NavHeader {
+	n := &NavHeader{
+		Prop: prop,
+	}
 	return n
 }
 

@@ -1,7 +1,7 @@
 package pages
 
 import (
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/layouts"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
@@ -15,11 +15,11 @@ type Home struct {
 
 func (h *Home) Render() app.UI {
 	return app.Div().Class("flex w-screen h-screen").Body(
-		&components.Nav{},
+		&layouts.Nav{},
 		app.Div().Class("flext flex-col w-full").Body(
-			components.NewNavHeader(navHeaderTitle),
+			layouts.NewNavHeader(layouts.NavHeaderProp{Title: navHeaderTitle}),
 			app.Div().Class().Body(
-				&components.FormConnection{},
+				&layouts.FormConnection{},
 			),
 		),
 	)

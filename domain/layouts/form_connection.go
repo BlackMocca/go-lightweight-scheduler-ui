@@ -1,10 +1,12 @@
-package components
+package layouts
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/models"
 	validator "github.com/go-ozzo/ozzo-validation/v4"
 	rule "github.com/go-ozzo/ozzo-validation/v4/is"
@@ -93,6 +95,17 @@ func (f *FormConnection) Render() app.UI {
 		}
 		return err.Error()
 	}
+	hostInput := components.NewInputText(&components.InputTextProp{
+		BaseInput: components.BaseInput{
+			Id:           "host",
+			PlaceHolder:  "http://127.0.0.1:3000",
+			Required:     true,
+			Disabled:     false,
+			ValidateFunc: []validation.ValidateRule{validation.Required, validation.URL},
+		},
+	})
+	app.Log(hostInput.Prop.CallbackValidateError)
+
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
 		app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
 			/* favourite name */
@@ -102,7 +115,7 @@ func (f *FormConnection) Render() app.UI {
 			app.Div().Class("col-span-2 flex items-center").Body(
 				app.Input().
 					ID("favourites").
-					Class("w-full leading-6 border border-gray-300 px-4 py-1 rounded-md focus:border-blue-500 focus:outline-none").
+					Class("w-full leading-6 border border-gray-300 px-2 py-1 rounded-md focus:border-blue-500 focus:outline-none").
 					Type("text").
 					Required(false).
 					OnChange(f.onChangeInput),
@@ -110,7 +123,7 @@ func (f *FormConnection) Render() app.UI {
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
 					Class("whitespace-normal break-words").
-					Text(printErr(f.validatorInput.hostErr)),
+					Text(""),
 			),
 
 			/* host */
@@ -118,18 +131,19 @@ func (f *FormConnection) Render() app.UI {
 				app.Label().Class().For("host").Text("Host"),
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
-				app.Input().
-					ID("host").
-					Class("w-full leading-6 border border-gray-300 px-4 py-1 rounded-md focus:border-blue-500 focus:outline-none").
-					Type("text").
-					Placeholder("http://127.0.0.1:3000").
-					Required(true).
-					OnChange(f.onChangeInput),
+				hostInput,
+				// app.Input().
+				// 	ID("host").
+				// 	Class("w-full leading-6 border border-gray-300 px-2 py-1 rounded-md focus:border-blue-500 focus:outline-none").
+				// 	Type("text").
+				// 	Placeholder("http://127.0.0.1:3000").
+				// 	Required(true).
+				// 	OnChange(f.onChangeInput),
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
-					Class("").
-					Text(printErr(f.validatorInput.hostErr)),
+					Class("text-red-500").
+					Text(printErr(hostInput.Prop.CallbackValidateError)),
 			),
 
 		// app.Div().Class("").Body(
