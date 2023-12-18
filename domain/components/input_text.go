@@ -32,7 +32,7 @@ func NewInputText(prop *InputTextProp) *InputText {
 			},
 		},
 		state: inputState{
-			value: prop.DefaultValue,
+			value: prop.Value,
 		},
 	}
 }
@@ -40,10 +40,12 @@ func NewInputText(prop *InputTextProp) *InputText {
 func (i *InputText) onChangeInput(ctx app.Context, e app.Event) {
 	value := ctx.JSSrc().Get("value").String()
 	validateErr := validation.Validate(value, i.Prop.ValidateFunc...)
-	i.Prop.CallbackValidateError = validateErr
 	i.state.isValidateErr = (validateErr != nil)
 
-	ctx.PreventUpdate()
+	if i.Prop.OnCallbackValidateError != nil {
+		i.Prop.OnCallbackValidateError(validateErr)
+	}
+	e.PreventDefault()
 }
 
 func (i *InputText) Render() app.UI {
@@ -56,7 +58,7 @@ func (i *InputText) Render() app.UI {
 		Class(class).
 		Disabled(i.Prop.Disabled).
 		Type("text").
-		Value(i.Prop.DefaultValue).
+		Value(i.state.value).
 		Placeholder(i.Prop.PlaceHolder).
 		Required(i.Prop.Required).
 		OnChange(i.onChangeInput)

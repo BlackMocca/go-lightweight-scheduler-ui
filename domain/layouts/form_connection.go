@@ -97,14 +97,15 @@ func (f *FormConnection) Render() app.UI {
 	}
 	hostInput := components.NewInputText(&components.InputTextProp{
 		BaseInput: components.BaseInput{
-			Id:           "host",
-			PlaceHolder:  "http://127.0.0.1:3000",
-			Required:     true,
-			Disabled:     false,
-			ValidateFunc: []validation.ValidateRule{validation.Required, validation.URL},
+			Id:                      "host",
+			PlaceHolder:             "http://127.0.0.1:3000",
+			Required:                true,
+			Disabled:                false,
+			Value:                   "",
+			ValidateFunc:            []validation.ValidateRule{validation.Required, validation.URL},
+			OnCallbackValidateError: validation.OnValidateCallback(f, &f.validatorInput.hostErr),
 		},
 	})
-	app.Log(hostInput.Prop.CallbackValidateError)
 
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
 		app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
@@ -143,7 +144,7 @@ func (f *FormConnection) Render() app.UI {
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
 					Class("text-red-500").
-					Text(printErr(hostInput.Prop.CallbackValidateError)),
+					Text(printErr(f.validatorInput.hostErr)),
 			),
 
 		// app.Div().Class("").Body(
