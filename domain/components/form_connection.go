@@ -3,6 +3,7 @@ package components
 import (
 	"time"
 
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/callback"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/elements"
@@ -154,17 +155,16 @@ func (f *FormConnection) Render() app.UI {
 			),
 
 			/* empty */
-			app.Div().Class(),
+			app.Span(),
+
 			/* button */
 			app.Div().Class("col-span-2 flex flex-row items-center justify-end gap-4").Body(
-				app.Button().
-					Class("px-4 py-2 text-primary-base rounded bg-secondary-base border border-gray-500 hover:bg-gray-100 hover:pointer-cursor hover:shadow").
+				elements.NewButton(constants.BUTTON_STYLE_SECONDARY).
 					Text("Save"),
-				app.Button().
-					Class("px-4 py-2 bg-primary-base text-secondary-base rounded hover:pointer-cursor hover:shadow hover:shadow-green-500").
-					Type("Submit").Text("Submit"),
+				elements.NewButton(constants.BUTTON_STYLE_PRIMARY).
+					Text("Connect").
+					Type("Submit"),
 			),
 		),
-		// OnClick(f.submit),
 	)
 }
