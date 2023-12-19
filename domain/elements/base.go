@@ -6,15 +6,14 @@ import (
 )
 
 type BaseInput struct {
-	Id                      string
-	PlaceHolder             string
-	Required                bool
-	Disabled                bool
-	Value                   string // default Value or current Value
-	OnCallbackValue         func(val app.Value)
-	ValidateFunc            []validation.ValidateRule
-	ValidateError           error
-	OnCallbackValidateError func(err error)
+	Id              string
+	PlaceHolder     string
+	Required        bool
+	Disabled        bool
+	Value           string // initial Value
+	OnCallbackValue func(val app.Value)
+	ValidateFunc    []validation.ValidateRule
+	ValidateError   error
 }
 
 func NewDefaultBaseInput() BaseInput {

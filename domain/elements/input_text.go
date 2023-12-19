@@ -2,6 +2,7 @@ package elements
 
 import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -18,13 +19,17 @@ type inputState struct {
 
 type InputText struct {
 	app.Compo
+	Parent core.ParentNotify
+	Tag    string
 	InputTextProp
 
 	state inputState
 }
 
-func NewInputText(prop *InputTextProp) InputText {
-	return InputText{
+func NewInputText(parent core.ParentNotify, tag string, prop *InputTextProp) *InputText {
+	return &InputText{
+		Parent: parent,
+		Tag:    tag,
 		InputTextProp: InputTextProp{
 			BaseInput: prop.BaseInput,
 			inputType: constants.INPUT_TYPE_TEXT,
@@ -35,8 +40,10 @@ func NewInputText(prop *InputTextProp) InputText {
 	}
 }
 
-func NewInputPassword(prop *InputTextProp) InputText {
-	return InputText{
+func NewInputPassword(parent core.ParentNotify, tag string, prop *InputTextProp) *InputText {
+	return &InputText{
+		Parent: parent,
+		Tag:    tag,
 		InputTextProp: InputTextProp{
 			BaseInput: prop.BaseInput,
 			inputType: constants.INPUT_TYPE_TEXT,
@@ -45,19 +52,19 @@ func NewInputPassword(prop *InputTextProp) InputText {
 			value: prop.Value,
 		},
 	}
+}
+
+func (i *InputText) GetValue() string {
+	return i.state.value
 }
 
 func (i *InputText) onChangeInput(ctx app.Context, e app.Event) {
 	value := ctx.JSSrc().Get("value")
 	validateErr := validation.Validate(value.String(), i.ValidateFunc...)
+	i.state.value = value.String()
 	i.state.isValidateErr = (validateErr != nil)
 
-	if i.OnCallbackValue != nil {
-		i.OnCallbackValue(value)
-	}
-	if i.OnCallbackValidateError != nil {
-		i.OnCallbackValidateError(validateErr)
-	}
+	i.Parent.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, i)
 
 	e.PreventDefault()
 }

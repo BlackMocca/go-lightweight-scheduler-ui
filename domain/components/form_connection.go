@@ -4,23 +4,46 @@ import (
 	"time"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/callback"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/models"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/elements"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
+const (
+	tagFavouriteInput = "FavouriteInput"
+	tagHostInput      = "HostInput"
+	tagUsernameInput  = "UsernameInput"
+	tagPasswordInput  = "PasswordInput"
+)
+
 type FormConnection struct {
 	app.Compo
+	Parent core.ParentNotify
 
-	favouriteInput elements.InputText
-	hostInput      elements.InputText
-	usernameInput  elements.InputText
-	passwordInput  elements.InputText
+	/* internal state format auto call method from GetData with template ${upper}fieldName*/
+	favouriteInput *elements.InputText
+	hostInput      *elements.InputText
+	usernameInput  *elements.InputText
+	passwordInput  *elements.InputText
+}
+
+func (f *FormConnection) FavouriteInput() *elements.InputText {
+	return f.favouriteInput
+}
+func (f *FormConnection) HostInput() *elements.InputText {
+	return f.hostInput
+}
+func (f *FormConnection) UsernameInput() *elements.InputText {
+	return f.usernameInput
+}
+func (f *FormConnection) PasswordInput() *elements.InputText {
+	return f.passwordInput
 }
 
 func (f *FormConnection) OnInit() {
-	f.favouriteInput = elements.NewInputText(&elements.InputTextProp{
+	f.favouriteInput = elements.NewInputText(f, tagFavouriteInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:          "favourite",
 			PlaceHolder: "Save connection name",
@@ -28,8 +51,7 @@ func (f *FormConnection) OnInit() {
 			Disabled:    false,
 		},
 	})
-
-	f.hostInput = elements.NewInputText(&elements.InputTextProp{
+	f.hostInput = elements.NewInputText(f, tagHostInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:           "host",
 			PlaceHolder:  "http://127.0.0.1:3000",
@@ -38,9 +60,7 @@ func (f *FormConnection) OnInit() {
 			ValidateFunc: []validation.ValidateRule{validation.Required, validation.URL},
 		},
 	})
-	f.hostInput.BaseInput.OnCallbackValidateError = callback.OnValidateCallback(f, &f.hostInput.BaseInput.ValidateError)
-
-	f.usernameInput = elements.NewInputText(&elements.InputTextProp{
+	f.usernameInput = elements.NewInputText(f, tagUsernameInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:           "username",
 			PlaceHolder:  "scheduler",
@@ -49,9 +69,7 @@ func (f *FormConnection) OnInit() {
 			ValidateFunc: []validation.ValidateRule{validation.Required, validation.Required},
 		},
 	})
-	f.usernameInput.BaseInput.OnCallbackValidateError = callback.OnValidateCallback(f, &f.usernameInput.BaseInput.ValidateError)
-
-	f.passwordInput = elements.NewInputPassword(&elements.InputTextProp{
+	f.passwordInput = elements.NewInputPassword(f, tagPasswordInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:           "password",
 			PlaceHolder:  "",
@@ -60,28 +78,61 @@ func (f *FormConnection) OnInit() {
 			ValidateFunc: []validation.ValidateRule{validation.Required, validation.Required},
 		},
 	})
-	f.passwordInput.BaseInput.OnCallbackValidateError = callback.OnValidateCallback(f, &f.passwordInput.BaseInput.ValidateError)
 }
 
-// func (f *FormConnection) submit(ctx app.Context, e app.Event) {
-// 	if !f.validatorInput.isPass {
-// 		f.Update()
-// 		return
-// 	}
+func (f *FormConnection) Event(event constants.Event, data interface{}) {
+	switch event {
+	case constants.EVENT_ON_VALIDATE_INPUT_TEXT:
+		if childElem, ok := data.(*elements.InputText); ok {
+			value := childElem.GetValue()
+			elem := core.CallMethod(f, childElem.Tag).(*elements.InputText)
+			elem.Value = elem.GetValue()
+			elem.ValidateError = validation.Validate(value, elem.ValidateFunc...)
+		}
+	}
+	f.Update()
+}
 
-// 	var favourite = f.input.favourites
-// 	if f.input.favourites == "" {
-// 		favourite = f.input.host
-// 	}
-// 	connection := models.NewConnectionList(favourite, f.input.host, f.input.username, f.input.password)
-// 	connection.Password = connection.GetEncodePassword()
+func (f *FormConnection) isValidatePass() bool {
+	f.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.hostInput)
+	f.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.usernameInput)
+	f.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.passwordInput)
 
-// 	var formConnections = []*models.ConnectionList{}
-// 	ctx.LocalStorage().Get(string(constants.CONNECTION_LIST), &formConnections)
+	var allValidates = []error{
+		f.hostInput.ValidateError,
+		f.usernameInput.ValidateError,
+		f.passwordInput.ValidateError,
+	}
+	for _, err := range allValidates {
+		if err != nil {
+			return false
+		}
+	}
 
-// 	formConnections = append(formConnections, connection)
-// 	ctx.LocalStorage().Set(string(constants.CONNECTION_LIST), formConnections)
-// }
+	return true
+}
+
+func (f *FormConnection) save(ctx app.Context, e app.Event) {
+	if !f.isValidatePass() {
+		return
+	}
+	app.Log("input validate success")
+	var favourite = f.favouriteInput.GetValue()
+	var host = f.hostInput.GetValue()
+	var username = f.usernameInput.GetValue()
+	var password = f.passwordInput.GetValue()
+	if favourite == "" {
+		favourite = host
+	}
+	connection := models.NewConnectionList(favourite, host, username, password)
+	connection.Password = connection.GetEncodePassword()
+
+	var formConnections = []*models.ConnectionList{}
+	ctx.LocalStorage().Get(string(constants.CONNECTION_LIST), &formConnections)
+
+	formConnections = append(formConnections, connection)
+	ctx.LocalStorage().Set(string(constants.CONNECTION_LIST), formConnections)
+}
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 	if e.Value.Get("key").String() == "Enter" {
@@ -107,7 +158,7 @@ func (f *FormConnection) Render() app.UI {
 				app.Label().Class().For(f.favouriteInput.Id).Text("Favourites Name"),
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
-				&f.favouriteInput,
+				f.favouriteInput,
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
@@ -120,7 +171,7 @@ func (f *FormConnection) Render() app.UI {
 				app.Label().Class().For(f.hostInput.Id).Text("Host"),
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
-				&f.hostInput,
+				f.hostInput,
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
@@ -133,7 +184,7 @@ func (f *FormConnection) Render() app.UI {
 				app.Label().Class().For(f.usernameInput.Id).Text("Username"),
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
-				&f.usernameInput,
+				f.usernameInput,
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
@@ -146,7 +197,7 @@ func (f *FormConnection) Render() app.UI {
 				app.Label().Class().For(f.passwordInput.Id).Text("Password"),
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
-				&f.passwordInput,
+				f.passwordInput,
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
@@ -163,7 +214,7 @@ func (f *FormConnection) Render() app.UI {
 					Text("Save"),
 				elements.NewButton(constants.BUTTON_STYLE_PRIMARY).
 					Text("Connect").
-					Type("Submit"),
+					OnClick(f.save),
 			),
 		),
 	)
