@@ -117,6 +117,7 @@ func (f *FormConnection) save(ctx app.Context, e app.Event) {
 		return
 	}
 	app.Log("input validate success")
+
 	var favourite = f.favouriteInput.GetValue()
 	var host = f.hostInput.GetValue()
 	var username = f.usernameInput.GetValue()
@@ -132,6 +133,12 @@ func (f *FormConnection) save(ctx app.Context, e app.Event) {
 
 	formConnections = append(formConnections, connection)
 	ctx.LocalStorage().Set(string(constants.CONNECTION_LIST), formConnections)
+}
+
+func (f *FormConnection) connect(ctx app.Context, e app.Event) {
+	f.save(ctx, e)
+	/* handle connect */
+
 }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
@@ -211,10 +218,11 @@ func (f *FormConnection) Render() app.UI {
 			/* button */
 			app.Div().Class("col-span-2 flex flex-row items-center justify-end gap-4").Body(
 				elements.NewButton(constants.BUTTON_STYLE_SECONDARY).
-					Text("Save"),
+					Text("Save").
+					OnClick(f.save),
 				elements.NewButton(constants.BUTTON_STYLE_PRIMARY).
 					Text("Connect").
-					OnClick(f.save),
+					OnClick(f.connect),
 			),
 		),
 	)
