@@ -1,4 +1,4 @@
-package layouts
+package components
 
 import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"

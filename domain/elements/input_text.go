@@ -1,12 +1,14 @@
-package components
+package elements
 
 import (
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
 type InputTextProp struct {
 	BaseInput
+	inputType constants.InputType
 }
 
 type inputState struct {
@@ -17,13 +19,27 @@ type inputState struct {
 type InputText struct {
 	app.Compo
 	InputTextProp
+
 	state inputState
 }
 
-func NewInputText(prop *InputTextProp) *InputText {
-	return &InputText{
+func NewInputText(prop *InputTextProp) InputText {
+	return InputText{
 		InputTextProp: InputTextProp{
 			BaseInput: prop.BaseInput,
+			inputType: constants.INPUT_TYPE_TEXT,
+		},
+		state: inputState{
+			value: prop.Value,
+		},
+	}
+}
+
+func NewInputPassword(prop *InputTextProp) InputText {
+	return InputText{
+		InputTextProp: InputTextProp{
+			BaseInput: prop.BaseInput,
+			inputType: constants.INPUT_TYPE_TEXT,
 		},
 		state: inputState{
 			value: prop.Value,
@@ -55,7 +71,7 @@ func (i *InputText) Render() app.UI {
 		ID(i.Id).
 		Class(class).
 		Disabled(i.Disabled).
-		Type("text").
+		Type(string(i.inputType)).
 		Value(i.state.value).
 		Placeholder(i.PlaceHolder).
 		Required(i.Required).

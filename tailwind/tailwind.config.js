@@ -39,9 +39,6 @@ module.exports = {
         base: "#FFFAFA"
       },
       red: "red",
-      // gray: {
-      //   "300": "#d1d5db"
-      // }
     },
     extend: {
       fontFamily: {
@@ -52,7 +49,7 @@ module.exports = {
       },
       colors:{
         ...defaultColorConfig.theme.colors
-      }
+      },
     }
   },
   plugins: [],

@@ -1,4 +1,4 @@
-package components
+package elements
 
 import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
