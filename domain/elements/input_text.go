@@ -64,7 +64,7 @@ func (i *InputText) onChangeInput(ctx app.Context, e app.Event) {
 	i.state.value = value.String()
 	i.state.isValidateErr = (validateErr != nil)
 
-	i.Parent.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, i)
+	i.Parent.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, i)
 
 	e.PreventDefault()
 }

@@ -16,6 +16,7 @@ const (
 	tagHostInput      = "HostInput"
 	tagUsernameInput  = "UsernameInput"
 	tagPasswordInput  = "PasswordInput"
+	tagVersionInput   = "VersionInput"
 )
 
 type FormConnection struct {
@@ -27,6 +28,7 @@ type FormConnection struct {
 	hostInput      *elements.InputText
 	usernameInput  *elements.InputText
 	passwordInput  *elements.InputText
+	versionInput   *elements.Dropdown
 }
 
 func (f *FormConnection) FavouriteInput() *elements.InputText {
@@ -40,6 +42,9 @@ func (f *FormConnection) UsernameInput() *elements.InputText {
 }
 func (f *FormConnection) PasswordInput() *elements.InputText {
 	return f.passwordInput
+}
+func (f *FormConnection) VasswordInput() *elements.Dropdown {
+	return f.versionInput
 }
 
 func (f *FormConnection) OnInit() {
@@ -78,9 +83,13 @@ func (f *FormConnection) OnInit() {
 			ValidateFunc: []validation.ValidateRule{validation.Required, validation.Required},
 		},
 	})
+	f.versionInput = elements.NewDropdown(f, tagVersionInput, &elements.DropdownProp{
+		Choices:            []string{"v1", "v2"},
+		DefaultSelectIndex: 1,
+	})
 }
 
-func (f *FormConnection) Event(event constants.Event, data interface{}) {
+func (f *FormConnection) Event(ctx app.Context, event constants.Event, data interface{}) {
 	switch event {
 	case constants.EVENT_ON_VALIDATE_INPUT_TEXT:
 		if childElem, ok := data.(*elements.InputText); ok {
@@ -94,9 +103,9 @@ func (f *FormConnection) Event(event constants.Event, data interface{}) {
 }
 
 func (f *FormConnection) isValidatePass() bool {
-	f.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.hostInput)
-	f.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.usernameInput)
-	f.Event(constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.passwordInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.hostInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.usernameInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.passwordInput)
 
 	var allValidates = []error{
 		f.hostInput.ValidateError,
@@ -151,13 +160,6 @@ func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 }
 
 func (f *FormConnection) Render() app.UI {
-	var printErr = func(err error) string {
-		if err == nil {
-			return ""
-		}
-		return err.Error()
-	}
-
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
 		app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
 			/* favourite name */
@@ -166,6 +168,19 @@ func (f *FormConnection) Render() app.UI {
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
 				f.favouriteInput,
+			),
+			app.Div().Class("col-span-1 flex items-center").Body(
+				app.Span().
+					Class("text-sm text-red-500").
+					Text(""),
+			),
+
+			/* version */
+			app.Div().Class("col-span-1 flex items-center").Body(
+				app.Label().Class().For("version").Text("Version"),
+			),
+			app.Div().Class("col-span-2 flex items-center").Body(
+				f.versionInput,
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
@@ -183,7 +198,7 @@ func (f *FormConnection) Render() app.UI {
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
 					Class("text-sm text-red-500").
-					Text(printErr(f.hostInput.ValidateError)),
+					Text(core.Error(f.hostInput.ValidateError)),
 			),
 
 			/* username */
@@ -196,7 +211,7 @@ func (f *FormConnection) Render() app.UI {
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
 					Class("text-sm text-red-500").
-					Text(printErr(f.usernameInput.ValidateError)),
+					Text(core.Error(f.usernameInput.ValidateError)),
 			),
 
 			/* password */
@@ -209,7 +224,7 @@ func (f *FormConnection) Render() app.UI {
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
 					Class("text-sm text-red-500").
-					Text(printErr(f.passwordInput.ValidateError)),
+					Text(core.Error(f.passwordInput.ValidateError)),
 			),
 
 			/* empty */

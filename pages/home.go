@@ -20,7 +20,7 @@ func (h *Home) OnMount(ctx app.Context) {
 	fmt.Println(" on mount")
 }
 
-func (h *Home) Event(event constants.Event, data interface{}) {
+func (h *Home) Event(app app.Context, event constants.Event, data interface{}) {
 	h.Update()
 }
 
