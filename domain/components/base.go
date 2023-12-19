@@ -1,14 +1,19 @@
 package components
 
-import "github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
+import (
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
+	"github.com/maxence-charriere/go-app/v9/pkg/app"
+)
 
 type BaseInput struct {
 	Id                      string
 	PlaceHolder             string
 	Required                bool
-	Value                   string
 	Disabled                bool
+	Value                   string // default Value or current Value
+	OnCallbackValue         func(val app.Value)
 	ValidateFunc            []validation.ValidateRule
+	ValidateError           error
 	OnCallbackValidateError func(err error)
 }
 

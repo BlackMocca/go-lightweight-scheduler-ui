@@ -3,13 +3,13 @@ package validation
 import (
 	validator "github.com/go-ozzo/ozzo-validation/v4"
 	rule "github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
 type ValidateRule func(val interface{}) error
 
 const (
 	requiredErr = "Must be Required"
+	urlErr      = "Must be a valid URL"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 		return validator.Validate(val, validator.Required.Error(requiredErr))
 	}
 	URL ValidateRule = func(val interface{}) error {
-		return validator.Validate(val, rule.RequestURI, rule.Host)
+		return validator.Validate(val, rule.URL.Error(urlErr))
 	}
 )
 
@@ -31,11 +31,4 @@ func Validate(val interface{}, rules ...ValidateRule) error {
 	}
 
 	return nil
-}
-
-func OnValidateCallback(elem app.Composer, field *error) func(err error) {
-	return func(err error) {
-		field = &err
-		elem.Update()
-	}
 }

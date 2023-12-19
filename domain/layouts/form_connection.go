@@ -1,83 +1,78 @@
 package layouts
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/callback"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/models"
-	validator "github.com/go-ozzo/ozzo-validation/v4"
-	rule "github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
 type FormConnection struct {
 	app.Compo
 
-	input struct {
-		favourites string
-		host       string
-		username   string
-		password   string
-	}
-	validatorInput struct {
-		isPass      bool
-		hostErr     error
-		usernameErr error
-		passwordErr error
-	}
+	// input struct {
+	// 	favourites string
+	// 	host       string
+	// 	username   string
+	// 	password   string
+	// }
+	// validatorInput struct {
+	// 	isPass      bool
+	// 	hostErr     error
+	// 	usernameErr error
+	// 	passwordErr error
+	// }
+
+	hostInput     *components.InputText
+	usernameInput *components.InputText
+	passwordInput *components.InputText
 }
 
-func (f *FormConnection) validate() {
-	f.validatorInput.hostErr = validator.Validate(f.input.host, validator.Required.Error("must be required"), rule.URL)
-	f.validatorInput.usernameErr = validator.Validate(f.input.username, validator.Required.Error("must be required"))
-	f.validatorInput.passwordErr = validator.Validate(f.input.password, validator.Required.Error("must be required"))
+func (f *FormConnection) OnInit() {
+	f.hostInput = components.NewInputText(&components.InputTextProp{
+		BaseInput: components.BaseInput{
+			Id:           "host",
+			PlaceHolder:  "http://127.0.0.1:3000",
+			Required:     true,
+			Disabled:     false,
+			ValidateFunc: []validation.ValidateRule{validation.Required, validation.URL},
+		},
+	})
+	f.hostInput.BaseInput.OnCallbackValidateError = callback.OnValidateCallback(f, &f.hostInput.BaseInput.ValidateError)
 
-	f.validatorInput.isPass = f.validatorInput.hostErr == nil && f.validatorInput.usernameErr == nil && f.validatorInput.passwordErr == nil
+	f.usernameInput = components.NewInputText(&components.InputTextProp{
+		BaseInput: components.BaseInput{
+			Id:           "username",
+			PlaceHolder:  "scheduler",
+			Required:     true,
+			Disabled:     false,
+			ValidateFunc: []validation.ValidateRule{validation.Required, validation.URL},
+		},
+	})
+	f.usernameInput.BaseInput.OnCallbackValidateError = callback.OnValidateCallback(f, &f.hostInput.BaseInput.ValidateError)
 }
 
-func (f *FormConnection) onChangeInput(ctx app.Context, e app.Event) {
-	value := ctx.JSSrc().Get("value").String()
+// func (f *FormConnection) submit(ctx app.Context, e app.Event) {
+// 	if !f.validatorInput.isPass {
+// 		f.Update()
+// 		return
+// 	}
 
-	elemId := ctx.JSSrc().Get("id").String()
-	switch elemId {
-	case "favourites":
-		f.input.favourites = value
-	case "host":
-		f.input.host = value
-	case "username":
-		f.input.username = value
-	case "password":
-		f.input.password = value
-	}
+// 	var favourite = f.input.favourites
+// 	if f.input.favourites == "" {
+// 		favourite = f.input.host
+// 	}
+// 	connection := models.NewConnectionList(favourite, f.input.host, f.input.username, f.input.password)
+// 	connection.Password = connection.GetEncodePassword()
 
-	f.validate()
-	f.Update()
-}
+// 	var formConnections = []*models.ConnectionList{}
+// 	ctx.LocalStorage().Get(string(constants.CONNECTION_LIST), &formConnections)
 
-func (f *FormConnection) submit(ctx app.Context, e app.Event) {
-	fmt.Println(f.input)
-	f.validate()
-	if !f.validatorInput.isPass {
-		f.Update()
-		return
-	}
-
-	var favourite = f.input.favourites
-	if f.input.favourites == "" {
-		favourite = f.input.host
-	}
-	connection := models.NewConnectionList(favourite, f.input.host, f.input.username, f.input.password)
-	connection.Password = connection.GetEncodePassword()
-
-	var formConnections = []*models.ConnectionList{}
-	ctx.LocalStorage().Get(string(constants.CONNECTION_LIST), &formConnections)
-
-	formConnections = append(formConnections, connection)
-	ctx.LocalStorage().Set(string(constants.CONNECTION_LIST), formConnections)
-}
+// 	formConnections = append(formConnections, connection)
+// 	ctx.LocalStorage().Set(string(constants.CONNECTION_LIST), formConnections)
+// }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 	if e.Value.Get("key").String() == "Enter" {
@@ -95,17 +90,6 @@ func (f *FormConnection) Render() app.UI {
 		}
 		return err.Error()
 	}
-	hostInput := components.NewInputText(&components.InputTextProp{
-		BaseInput: components.BaseInput{
-			Id:                      "host",
-			PlaceHolder:             "http://127.0.0.1:3000",
-			Required:                true,
-			Disabled:                false,
-			Value:                   "",
-			ValidateFunc:            []validation.ValidateRule{validation.Required, validation.URL},
-			OnCallbackValidateError: validation.OnValidateCallback(f, &f.validatorInput.hostErr),
-		},
-	})
 
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
 		app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
@@ -118,12 +102,12 @@ func (f *FormConnection) Render() app.UI {
 					ID("favourites").
 					Class("w-full leading-6 border border-gray-300 px-2 py-1 rounded-md focus:border-blue-500 focus:outline-none").
 					Type("text").
-					Required(false).
-					OnChange(f.onChangeInput),
+					Required(false),
+				// OnChange(f.onChangeInput),
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
-					Class("whitespace-normal break-words").
+					Class("text-sm text-red-500").
 					Text(""),
 			),
 
@@ -132,7 +116,7 @@ func (f *FormConnection) Render() app.UI {
 				app.Label().Class().For("host").Text("Host"),
 			),
 			app.Div().Class("col-span-2 flex items-center").Body(
-				hostInput,
+				f.hostInput,
 				// app.Input().
 				// 	ID("host").
 				// 	Class("w-full leading-6 border border-gray-300 px-2 py-1 rounded-md focus:border-blue-500 focus:outline-none").
@@ -143,8 +127,8 @@ func (f *FormConnection) Render() app.UI {
 			),
 			app.Div().Class("col-span-1 flex items-center").Body(
 				app.Span().
-					Class("text-red-500").
-					Text(printErr(f.validatorInput.hostErr)),
+					Class("text-sm text-red-500").
+					Text(printErr(f.hostInput.ValidateError)),
 			),
 
 		// app.Div().Class("").Body(
@@ -191,8 +175,8 @@ func (f *FormConnection) Render() app.UI {
 		),
 		app.Div().Class("flex flex-row gap-2").Body(
 			app.Button().ID("form-conntection-submit").Class("").
-				Type("Submit").Text("Submit").
-				OnClick(f.submit),
+				Type("Submit").Text("Submit"),
+			// OnClick(f.submit),
 		),
 	)
 }

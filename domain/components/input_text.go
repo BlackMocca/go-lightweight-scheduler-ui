@@ -16,20 +16,14 @@ type inputState struct {
 
 type InputText struct {
 	app.Compo
-	Prop  InputTextProp
+	InputTextProp
 	state inputState
 }
 
 func NewInputText(prop *InputTextProp) *InputText {
 	return &InputText{
-		Prop: InputTextProp{
-			BaseInput: BaseInput{
-				Id:           prop.Id,
-				PlaceHolder:  prop.PlaceHolder,
-				Required:     prop.Required,
-				Disabled:     prop.Disabled,
-				ValidateFunc: prop.ValidateFunc,
-			},
+		InputTextProp: InputTextProp{
+			BaseInput: prop.BaseInput,
 		},
 		state: inputState{
 			value: prop.Value,
@@ -38,13 +32,17 @@ func NewInputText(prop *InputTextProp) *InputText {
 }
 
 func (i *InputText) onChangeInput(ctx app.Context, e app.Event) {
-	value := ctx.JSSrc().Get("value").String()
-	validateErr := validation.Validate(value, i.Prop.ValidateFunc...)
+	value := ctx.JSSrc().Get("value")
+	validateErr := validation.Validate(value.String(), i.ValidateFunc...)
 	i.state.isValidateErr = (validateErr != nil)
 
-	if i.Prop.OnCallbackValidateError != nil {
-		i.Prop.OnCallbackValidateError(validateErr)
+	if i.OnCallbackValue != nil {
+		i.OnCallbackValue(value)
 	}
+	if i.OnCallbackValidateError != nil {
+		i.OnCallbackValidateError(validateErr)
+	}
+
 	e.PreventDefault()
 }
 
@@ -54,12 +52,12 @@ func (i *InputText) Render() app.UI {
 		class += " border-red-500 "
 	}
 	return app.Input().
-		ID(i.Prop.Id).
+		ID(i.Id).
 		Class(class).
-		Disabled(i.Prop.Disabled).
+		Disabled(i.Disabled).
 		Type("text").
 		Value(i.state.value).
-		Placeholder(i.Prop.PlaceHolder).
-		Required(i.Prop.Required).
+		Placeholder(i.PlaceHolder).
+		Required(i.Required).
 		OnChange(i.onChangeInput)
 }
