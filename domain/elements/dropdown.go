@@ -3,6 +3,7 @@ package elements
 import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -14,13 +15,15 @@ const (
 )
 
 type DropdownProp struct {
-	Choices            []string
-	DefaultSelectIndex int
+	MenuItems         []MenuItem
+	SelectIndex       int
+	DefaultToggleText string
 }
 
 type dropdownState struct {
-	choiceIndex int
-	isActive    bool
+	choiceIndex  int
+	isMenuOpened bool
+	toggleText   string
 }
 
 type Dropdown struct {
@@ -33,44 +36,46 @@ type Dropdown struct {
 }
 
 func NewDropdown(parent core.ParentNotify, tag string, prop *DropdownProp) *Dropdown {
-	return &Dropdown{
+	ptr := &Dropdown{
 		Parent: parent,
 		Tag:    tag,
 		DropdownProp: DropdownProp{
-			Choices:            prop.Choices,
-			DefaultSelectIndex: prop.DefaultSelectIndex,
+			MenuItems:   prop.MenuItems,
+			SelectIndex: prop.SelectIndex,
 		},
 		state: dropdownState{
-			choiceIndex: prop.DefaultSelectIndex,
-			isActive:    false,
+			choiceIndex:  prop.SelectIndex,
+			isMenuOpened: false,
+			toggleText:   prop.DefaultToggleText,
 		},
 	}
+
+	return ptr
 }
 
 func (elem *Dropdown) toggleMenu(ctx app.Context, e app.Event) {
-	elem.state.isActive = !elem.state.isActive
+	elem.state.isMenuOpened = !elem.state.isMenuOpened
 	elem.Update()
 }
 
 func (elem *Dropdown) closedMenu(ctx app.Context, e app.Event) {
-	elem.state.isActive = false
+	elem.state.isMenuOpened = false
 	elem.Update()
 }
 
 func (elem *Dropdown) chooseItem(ctx app.Context, e app.Event) {
-	app.Log("choose item")
-	app.Log(ctx.Src())
-	e.Get("")
+	menuIndex := cast.ToInt(ctx.JSSrc().Get("value").String())
+	elem.state.toggleText = elem.DropdownProp.MenuItems[menuIndex].Display()
+	elem.Update()
 }
 
-// func (elem *Dropdown) GetValue() string {
-// return elem.state.choiceIndex
-// }
+func (elem *Dropdown) GetValue() string {
+	return cast.ToString(elem.state.choiceIndex)
+}
 
 func (elem *Dropdown) Render() app.UI {
 	return app.Div().
 		Class("relative inline-block text-left").
-		// OnClick(elem.closedMenu).
 		Body(
 			app.Button().
 				Class("inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50").
@@ -83,10 +88,10 @@ func (elem *Dropdown) Render() app.UI {
 				Body(
 					app.P().
 						Class("text-sm text-gray-900").
-						Text("Version"),
+						Text(elem.state.toggleText),
 					app.Raw(dropdownIconSvg),
 				),
-			app.If(elem.state.isActive,
+			app.If(elem.state.isMenuOpened,
 				app.Div().Class("absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-secondary-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none").
 					TabIndex(-1).
 					Role("menu").
@@ -94,15 +99,15 @@ func (elem *Dropdown) Render() app.UI {
 					Aria("labelledby", "menu-button").
 					Body(
 						app.Div().Class("py-1").Role("none").TabIndex(-1).Body(
-							app.Range(elem.DropdownProp.Choices).Slice(func(index int) app.UI {
+							app.Range(elem.DropdownProp.MenuItems).Slice(func(index int) app.UI {
 								return app.P().
 									Class("text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100").
 									Attr("value", index).
-									Attr("value-index", index).
+									// Attr("value-index", index).
 									Role("menuitem").
 									TabIndex(-1).
 									OnMouseDown(elem.chooseItem).
-									Text(elem.DropdownProp.Choices[index])
+									Text(elem.DropdownProp.MenuItems[index].Display())
 							}),
 						),
 					),

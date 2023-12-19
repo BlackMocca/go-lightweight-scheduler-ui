@@ -16,6 +16,7 @@ services:
       - .:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
       - ./pages:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/pages
       - ./domain:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/domain
+      - ./models:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/models
       - ./resources:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/resources
       - ./build:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/build
     

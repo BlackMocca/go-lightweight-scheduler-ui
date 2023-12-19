@@ -5,10 +5,11 @@ import (
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/models"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/elements"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -17,6 +18,11 @@ const (
 	tagUsernameInput  = "UsernameInput"
 	tagPasswordInput  = "PasswordInput"
 	tagVersionInput   = "VersionInput"
+)
+
+var (
+	versionList       = []interface{}{"v1", "v2"}
+	versionToggleText = "Version"
 )
 
 type FormConnection struct {
@@ -84,8 +90,9 @@ func (f *FormConnection) OnInit() {
 		},
 	})
 	f.versionInput = elements.NewDropdown(f, tagVersionInput, &elements.DropdownProp{
-		Choices:            []string{"v1", "v2"},
-		DefaultSelectIndex: 1,
+		MenuItems:         elements.NewMenuItem(versionList...),
+		SelectIndex:       1,
+		DefaultToggleText: versionToggleText,
 	})
 }
 
@@ -97,6 +104,11 @@ func (f *FormConnection) Event(ctx app.Context, event constants.Event, data inte
 			elem := core.CallMethod(f, childElem.Tag).(*elements.InputText)
 			elem.Value = elem.GetValue()
 			elem.ValidateError = validation.Validate(value, elem.ValidateFunc...)
+		}
+	case constants.EVENT_ON_SELECT:
+		if childElem, ok := data.(*elements.Dropdown); ok {
+			elem := core.CallMethod(f, childElem.Tag).(*elements.Dropdown)
+			elem.DropdownProp.SelectIndex = cast.ToInt(childElem.GetValue())
 		}
 	}
 	f.Update()
@@ -122,6 +134,8 @@ func (f *FormConnection) isValidatePass() bool {
 }
 
 func (f *FormConnection) save(ctx app.Context, e app.Event) {
+	var version = cast.ToInt(f.versionInput.GetValue())
+	app.Log(version)
 	if !f.isValidatePass() {
 		return
 	}
