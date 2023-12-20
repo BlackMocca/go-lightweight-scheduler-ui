@@ -15,6 +15,6 @@ const (
 	*/
 	EVENT_ON_SELECT
 
-	/* command parent update */
+	/* update data something */
 	EVENT_UPDATE
 )

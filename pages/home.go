@@ -11,6 +11,7 @@ import (
 
 const (
 	navHeaderTitle = "New Connection"
+	tagConnection  = "ConnectionList"
 )
 
 type Home struct {
@@ -19,23 +20,35 @@ type Home struct {
 	connectionList []*models.ConnectionList
 }
 
-func (h *Home) OnMount(ctx app.Context) {
-	fmt.Println(" on mount")
+func (h *Home) ConnectionList() []*models.ConnectionList {
+	return h.connectionList
+}
+
+func (h *Home) getDataStorage(ctx app.Context) error {
 	if err := ctx.LocalStorage().Get(string(constants.STORAGE_CONNECTION_LIST), &h.connectionList); err != nil {
-		app.Log(err)
-		return
+		return err
 	}
+	return nil
+}
+
+func (h *Home) OnMount(ctx app.Context) {
+	h.getDataStorage(ctx)
 }
 
 func (h *Home) OnNav(ctx app.Context) {
 	fmt.Println("on nav")
 }
 
-func (h *Home) OnUpdate(ctx app.Context) {
-	fmt.Println("on update")
-}
-
-func (h *Home) Event(app app.Context, event constants.Event, data interface{}) {
+func (h *Home) Event(ctx app.Context, event constants.Event, data interface{}) {
+	switch event {
+	case constants.EVENT_UPDATE:
+		if _, ok := data.(*models.ConnectionList); ok {
+			if err := h.getDataStorage(ctx); err != nil {
+				app.Log(err)
+				return
+			}
+		}
+	}
 
 	h.Update()
 }

@@ -188,12 +188,12 @@ func (f *FormConnection) save(ctx app.Context, e app.Event) {
 	}
 
 	// f.Parent.Event(ctx, )
+	f.Parent.Event(ctx, constants.EVENT_UPDATE, connection)
 }
 
 func (f *FormConnection) connect(ctx app.Context, e app.Event) {
 	f.save(ctx, e)
 	/* handle connect */
-
 }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
