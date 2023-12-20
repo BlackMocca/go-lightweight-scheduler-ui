@@ -92,7 +92,7 @@ func (f *FormConnection) OnInit() {
 	})
 	f.versionInput = elements.NewDropdown(f, tagVersionInput, &elements.DropdownProp{
 		MenuItems:         elements.NewMenuItem(versionList...),
-		SelectIndex:       -1,
+		SelectIndex:       versionDefaultIndex,
 		DefaultToggleText: versionToggleText,
 		ValidateFunc:      []validation.ValidateRule{validation.Selected},
 	})
@@ -143,28 +143,51 @@ func (f *FormConnection) isValidatePass() bool {
 	return true
 }
 
-func (f *FormConnection) save(ctx app.Context, e app.Event) {
-	var version = cast.ToInt(f.versionInput.GetValue())
-	app.Log(version)
+func (f *FormConnection) getForm() *models.ConnectionList {
 	if !f.isValidatePass() {
-		return
+		return nil
 	}
 
+	/* save connection into local storage */
 	var favourite = f.favouriteInput.GetValue()
 	var host = f.hostInput.GetValue()
 	var username = f.usernameInput.GetValue()
 	var password = f.passwordInput.GetValue()
+	var version = f.versionInput.GetValueDisplay()
 	if favourite == "" {
 		favourite = host
 	}
-	connection := models.NewConnectionList(favourite, host, username, password)
+
+	connection := models.NewConnectionList(version, favourite, host, username, password)
 	connection.Password = connection.GetEncodePassword()
 
-	var formConnections = []*models.ConnectionList{}
-	ctx.LocalStorage().Get(string(constants.CONNECTION_LIST), &formConnections)
+	return connection
+}
 
+func (f *FormConnection) storeConnection(ctx app.Context, connection *models.ConnectionList) error {
+	var formConnections = []*models.ConnectionList{}
+	if err := ctx.LocalStorage().Get(string(constants.STORAGE_CONNECTION_LIST), &formConnections); err != nil {
+		return nil
+	}
 	formConnections = append(formConnections, connection)
-	ctx.LocalStorage().Set(string(constants.CONNECTION_LIST), formConnections)
+
+	if err := ctx.LocalStorage().Set(string(constants.STORAGE_CONNECTION_LIST), formConnections); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *FormConnection) save(ctx app.Context, e app.Event) {
+	connection := f.getForm()
+	if connection == nil {
+		return
+	}
+	if err := f.storeConnection(ctx, connection); err != nil {
+		app.Log(err)
+		/* handler error save here */
+	}
+
+	// f.Parent.Event(ctx, )
 }
 
 func (f *FormConnection) connect(ctx app.Context, e app.Event) {
@@ -176,7 +199,7 @@ func (f *FormConnection) connect(ctx app.Context, e app.Event) {
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 	if e.Value.Get("key").String() == "Enter" {
 		time.Sleep(100 * time.Millisecond)
-		if buttonElem := app.Window().GetElementByID("form-conntection-submit"); buttonElem != nil {
+		if buttonElem := app.Window().GetElementByID("connect"); buttonElem != nil {
 			buttonElem.Call("click")
 		}
 	}
@@ -259,6 +282,7 @@ func (f *FormConnection) Render() app.UI {
 					Text("Save").
 					OnClick(f.save),
 				elements.NewButton(constants.BUTTON_STYLE_PRIMARY).
+					ID("connect").
 					Text("Connect").
 					OnClick(f.connect),
 			),

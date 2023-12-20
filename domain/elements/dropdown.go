@@ -80,8 +80,11 @@ func (elem *Dropdown) chooseItem(ctx app.Context, e app.Event) {
 	elem.Update()
 }
 
-func (elem *Dropdown) GetValue() string {
-	return cast.ToString(elem.state.value)
+func (elem *Dropdown) GetValue() int {
+	return elem.state.value
+}
+func (elem *Dropdown) GetValueDisplay() string {
+	return cast.ToString(elem.DropdownProp.MenuItems[elem.state.value].Display())
 }
 
 func (elem *Dropdown) Render() app.UI {

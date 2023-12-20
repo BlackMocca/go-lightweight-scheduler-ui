@@ -1,16 +1,22 @@
 package models
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+)
 
 type ConnectionList struct {
+	Version    string `json:"version"`
 	Favourites string `json:"favourites"`
 	Host       string `json:"host"`
 	Username   string `json:"username"`
 	Password   string `json:"password"`
 }
 
-func NewConnectionList(favourites, host, username, password string) *ConnectionList {
+type ConnectionLists []*ConnectionList
+
+func NewConnectionList(version, favourites, host, username, password string) *ConnectionList {
 	return &ConnectionList{
+		Version:    version,
 		Favourites: favourites,
 		Host:       host,
 		Username:   username,

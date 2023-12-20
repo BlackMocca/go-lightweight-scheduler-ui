@@ -3,7 +3,7 @@ package constants
 type LocalStorageKey string
 
 const (
-	CONNECTION_LIST LocalStorageKey = "connection-list"
+	STORAGE_CONNECTION_LIST LocalStorageKey = "connection-list"
 )
 
 type AssetPath string
