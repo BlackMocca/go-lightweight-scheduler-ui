@@ -16,6 +16,9 @@ var (
 	Required ValidateRule = func(val interface{}) error {
 		return validator.Validate(val, validator.Required.Error(requiredErr))
 	}
+	Selected ValidateRule = func(val interface{}) error {
+		return validator.Validate(val, validator.Min(0))
+	}
 	URL ValidateRule = func(val interface{}) error {
 		return validator.Validate(val, rule.URL.Error(urlErr))
 	}

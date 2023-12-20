@@ -1,7 +1,10 @@
 package elements
 
 import (
+	"fmt"
+
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/spf13/cast"
 )
@@ -18,10 +21,12 @@ type DropdownProp struct {
 	MenuItems         []MenuItem
 	SelectIndex       int
 	DefaultToggleText string
+	ValidateError     error
+	ValidateFunc      []validation.ValidateRule
 }
 
 type dropdownState struct {
-	choiceIndex  int
+	value        int
 	isMenuOpened bool
 	toggleText   string
 }
@@ -40,14 +45,19 @@ func NewDropdown(parent core.ParentNotify, tag string, prop *DropdownProp) *Drop
 		Parent: parent,
 		Tag:    tag,
 		DropdownProp: DropdownProp{
-			MenuItems:   prop.MenuItems,
-			SelectIndex: prop.SelectIndex,
+			MenuItems:     prop.MenuItems,
+			SelectIndex:   prop.SelectIndex,
+			ValidateError: prop.ValidateError,
+			ValidateFunc:  prop.ValidateFunc,
 		},
 		state: dropdownState{
-			choiceIndex:  prop.SelectIndex,
+			value:        prop.SelectIndex,
 			isMenuOpened: false,
 			toggleText:   prop.DefaultToggleText,
 		},
+	}
+	if ptr.state.value != -1 {
+		ptr.state.toggleText = ptr.DropdownProp.MenuItems[ptr.state.value].Display()
 	}
 
 	return ptr
@@ -66,19 +76,25 @@ func (elem *Dropdown) closedMenu(ctx app.Context, e app.Event) {
 func (elem *Dropdown) chooseItem(ctx app.Context, e app.Event) {
 	menuIndex := cast.ToInt(ctx.JSSrc().Get("value").String())
 	elem.state.toggleText = elem.DropdownProp.MenuItems[menuIndex].Display()
+	elem.state.value = menuIndex
 	elem.Update()
 }
 
 func (elem *Dropdown) GetValue() string {
-	return cast.ToString(elem.state.choiceIndex)
+	return cast.ToString(elem.state.value)
 }
 
 func (elem *Dropdown) Render() app.UI {
+	buttonClass := "inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+	if elem.DropdownProp.ValidateError != nil {
+		buttonClass = fmt.Sprintf("%s ring-red-500", buttonClass)
+	}
+
 	return app.Div().
 		Class("relative inline-block text-left").
 		Body(
 			app.Button().
-				Class("inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50").
+				Class(buttonClass).
 				Type("button").
 				OnClick(elem.toggleMenu).
 				OnBlur(elem.closedMenu).

@@ -6,7 +6,7 @@ const (
 	/*
 		Used for Input text element validate value form
 	*/
-	EVENT_ON_VALIDATE_INPUT_TEXT Event = iota
+	EVENT_ON_VALIDATE_INPUT Event = iota
 
 	/*
 		Used Event When Component was change input

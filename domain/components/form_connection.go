@@ -21,8 +21,9 @@ const (
 )
 
 var (
-	versionList       = []interface{}{"v1", "v2"}
-	versionToggleText = "Version"
+	versionList         = []interface{}{"v1"}
+	versionDefaultIndex = 0
+	versionToggleText   = "Version"
 )
 
 type FormConnection struct {
@@ -49,7 +50,7 @@ func (f *FormConnection) UsernameInput() *elements.InputText {
 func (f *FormConnection) PasswordInput() *elements.InputText {
 	return f.passwordInput
 }
-func (f *FormConnection) VasswordInput() *elements.Dropdown {
+func (f *FormConnection) VersionInput() *elements.Dropdown {
 	return f.versionInput
 }
 
@@ -91,19 +92,26 @@ func (f *FormConnection) OnInit() {
 	})
 	f.versionInput = elements.NewDropdown(f, tagVersionInput, &elements.DropdownProp{
 		MenuItems:         elements.NewMenuItem(versionList...),
-		SelectIndex:       1,
+		SelectIndex:       -1,
 		DefaultToggleText: versionToggleText,
+		ValidateFunc:      []validation.ValidateRule{validation.Selected},
 	})
 }
 
 func (f *FormConnection) Event(ctx app.Context, event constants.Event, data interface{}) {
 	switch event {
-	case constants.EVENT_ON_VALIDATE_INPUT_TEXT:
+	case constants.EVENT_ON_VALIDATE_INPUT:
 		if childElem, ok := data.(*elements.InputText); ok {
 			value := childElem.GetValue()
 			elem := core.CallMethod(f, childElem.Tag).(*elements.InputText)
 			elem.Value = elem.GetValue()
 			elem.ValidateError = validation.Validate(value, elem.ValidateFunc...)
+		}
+		if childElem, ok := data.(*elements.Dropdown); ok {
+			elem := core.CallMethod(f, childElem.Tag).(*elements.Dropdown)
+			elem.DropdownProp.SelectIndex = cast.ToInt(childElem.GetValue())
+			elem.ValidateError = validation.Validate(elem.DropdownProp.SelectIndex, elem.ValidateFunc...)
+			childElem.Update()
 		}
 	case constants.EVENT_ON_SELECT:
 		if childElem, ok := data.(*elements.Dropdown); ok {
@@ -115,14 +123,16 @@ func (f *FormConnection) Event(ctx app.Context, event constants.Event, data inte
 }
 
 func (f *FormConnection) isValidatePass() bool {
-	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.hostInput)
-	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.usernameInput)
-	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT_TEXT, f.passwordInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT, f.hostInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT, f.usernameInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT, f.passwordInput)
+	f.Event(nil, constants.EVENT_ON_VALIDATE_INPUT, f.versionInput)
 
 	var allValidates = []error{
 		f.hostInput.ValidateError,
 		f.usernameInput.ValidateError,
 		f.passwordInput.ValidateError,
+		f.versionInput.ValidateError,
 	}
 	for _, err := range allValidates {
 		if err != nil {
@@ -139,7 +149,6 @@ func (f *FormConnection) save(ctx app.Context, e app.Event) {
 	if !f.isValidatePass() {
 		return
 	}
-	app.Log("input validate success")
 
 	var favourite = f.favouriteInput.GetValue()
 	var host = f.hostInput.GetValue()
