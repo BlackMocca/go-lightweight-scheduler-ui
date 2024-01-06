@@ -35,15 +35,15 @@ var (
 		Title:       "Godflow",
 		Description: "Make to Easy ETL",
 		Icon: app.Icon{
-			SVG: "/web/resources/assets/logo/logo-color.svg",
+			Default: "/web/resources/assets/logo/logo-no-background.png",
+			SVG:     "/web/resources/assets/logo/logo-no-background.svg",
 		},
+		LoadingLabel: "Loading {progress}%",
 		Styles: []string{
 			"/web/resources/styles/tailwind/tailwind-min.css",
+			"/web/resources/styles/loading.css",
 		},
-		CacheableResources: []string{
-			// "/web/resources/styles/tailwind/tailwind-min.css",
-			// "/web/resources/assets/logo.svg",
-		},
+		CacheableResources: []string{},
 		Fonts: []string{
 			"/web/resources/fonts/Kanit-Regular.ttf",
 			"/web/resources/fonts/Kanit-Light.ttf",

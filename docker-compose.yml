@@ -11,7 +11,7 @@ services:
     networks: 
       - default
     ports:
-      - 8085:8080
+      - 8083:8080
     volumes:
       - .:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui
       - ./pages:/go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/pages

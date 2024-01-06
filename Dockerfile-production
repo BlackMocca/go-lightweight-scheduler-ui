@@ -25,6 +25,7 @@ COPY . .
 RUN go mod tidy     
 
 RUN cd tailwind && tailwindcss -i ./tailwind-min.css -o ../resources/styles/tailwind/tailwind-min.css --minify
+RUN mkdir -p build/web/resources && cp -r resources build/web
 RUN GOARCH=wasm GOOS=js go build -o ./build/web/app.wasm main.go
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o  ./build/app main.go
 
