@@ -18,9 +18,8 @@ module.exports = {
       laptop: "1280px",
     },
     fontFamily: {
-      kanit: "Kanit-Regular",
-      kanitLight: "Kanit-Light",
-      kanitBold: "Kanit-Bold",
+      kanit: "Kanit-Light",
+      kanitBold: "Kanit-Regular",
     },
     fontSize: {
       sm: '0.8rem',
@@ -42,7 +41,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ['Kanit-Regular', 'Kanit-Light', 'Kanit-Bold']
+        sans: ['Kanit-Light', 'Kanit-Regular']
       },
       borderWidth: {
         '0.5': '0.5px',

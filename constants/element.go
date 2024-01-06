@@ -15,4 +15,7 @@ const (
 
 	// class secondary button style
 	BUTTON_STYLE_SECONDARY
+
+	// class disabled button
+	BUTTON_STYLE_DISABLE
 )

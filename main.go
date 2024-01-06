@@ -43,6 +43,9 @@ var (
 			"/web/resources/styles/tailwind/tailwind-min.css",
 			"/web/resources/styles/loading.css",
 		},
+		Scripts: []string{
+			"/web/resources/javascripts/event.js",
+		},
 		CacheableResources: []string{},
 		Fonts: []string{
 			"/web/resources/fonts/Kanit-Regular.ttf",

@@ -8,9 +8,7 @@ type NavHeaderProp struct {
 
 type NavHeader struct {
 	app.Compo
-	Prop struct {
-		Title string
-	}
+	Prop NavHeaderProp
 }
 
 func NewNavHeader(prop NavHeaderProp) *NavHeader {

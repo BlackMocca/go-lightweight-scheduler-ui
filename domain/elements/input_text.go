@@ -46,7 +46,7 @@ func NewInputPassword(parent core.ParentNotify, tag string, prop *InputTextProp)
 		Tag:    tag,
 		InputTextProp: InputTextProp{
 			BaseInput: prop.BaseInput,
-			inputType: constants.INPUT_TYPE_TEXT,
+			inputType: constants.INPUT_TYPE_PASSWORD,
 		},
 		state: inputState{
 			value: prop.Value,
@@ -56,6 +56,11 @@ func NewInputPassword(parent core.ParentNotify, tag string, prop *InputTextProp)
 
 func (i *InputText) GetValue() string {
 	return i.state.value
+}
+
+func (i *InputText) SetValue(value string) *InputText {
+	i.state.value = value
+	return i
 }
 
 func (i *InputText) onChangeInput(ctx app.Context, e app.Event) {
@@ -82,5 +87,6 @@ func (i *InputText) Render() app.UI {
 		Value(i.state.value).
 		Placeholder(i.PlaceHolder).
 		Required(i.Required).
+		AutoComplete(false).
 		OnChange(i.onChangeInput)
 }

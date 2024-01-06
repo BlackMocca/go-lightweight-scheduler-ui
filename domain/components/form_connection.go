@@ -26,9 +26,14 @@ var (
 	versionToggleText   = "Version"
 )
 
+type FormConnectionProp struct {
+	Connection *models.ConnectionList
+}
+
 type FormConnection struct {
 	app.Compo
 	Parent core.ParentNotify
+	Prop   FormConnectionProp
 
 	/* internal state format auto call method from GetData with template ${upper}fieldName*/
 	favouriteInput *elements.InputText
@@ -36,6 +41,10 @@ type FormConnection struct {
 	usernameInput  *elements.InputText
 	passwordInput  *elements.InputText
 	versionInput   *elements.Dropdown
+}
+
+func NewFormConnection(parent core.ParentNotify, prop FormConnectionProp) *FormConnection {
+	return &FormConnection{Parent: parent, Prop: prop}
 }
 
 func (f *FormConnection) FavouriteInput() *elements.InputText {
@@ -52,6 +61,10 @@ func (f *FormConnection) PasswordInput() *elements.InputText {
 }
 func (f *FormConnection) VersionInput() *elements.Dropdown {
 	return f.versionInput
+}
+
+func (f *FormConnection) isFormDisabled() bool {
+	return f.Prop.Connection != nil
 }
 
 func (f *FormConnection) OnInit() {
@@ -118,6 +131,26 @@ func (f *FormConnection) Event(ctx app.Context, event constants.Event, data inte
 			elem := core.CallMethod(f, childElem.Tag).(*elements.Dropdown)
 			elem.DropdownProp.SelectIndex = cast.ToInt(childElem.GetValue())
 		}
+	case constants.EVENT_FILL_DATA_FORM_CONNECTION:
+		if connection, ok := data.(*models.ConnectionList); ok {
+			f.favouriteInput.BaseInput.Disabled = true
+			f.versionInput.DropdownProp.Disable = true
+			f.hostInput.BaseInput.Disabled = true
+			f.usernameInput.BaseInput.Disabled = true
+			f.passwordInput.BaseInput.Disabled = true
+
+			f.favouriteInput.SetValue(connection.Favourites)
+			f.versionInput.SetValue(f.versionInput.FindIndexByDisplay(connection.Version))
+			f.hostInput.SetValue(connection.Host)
+			f.usernameInput.SetValue(connection.Username)
+			f.passwordInput.SetValue(connection.GetDecodePassword())
+
+			f.favouriteInput.Update()
+			f.versionInput.Update()
+			f.hostInput.Update()
+			f.usernameInput.Update()
+			f.passwordInput.Update()
+		}
 	}
 	f.Update()
 }
@@ -146,6 +179,10 @@ func (f *FormConnection) isValidatePass() bool {
 func (f *FormConnection) getForm() *models.ConnectionList {
 	if !f.isValidatePass() {
 		return nil
+	}
+	/* return connection prop if exists */
+	if f.Prop.Connection != nil {
+		return f.Prop.Connection
 	}
 
 	/* save connection into local storage */
@@ -192,8 +229,9 @@ func (f *FormConnection) save(ctx app.Context, e app.Event) {
 }
 
 func (f *FormConnection) connect(ctx app.Context, e app.Event) {
-	f.save(ctx, e)
 	/* handle connect */
+	connection := f.getForm()
+	app.Log(connection)
 }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
@@ -207,84 +245,87 @@ func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 
 func (f *FormConnection) Render() app.UI {
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
-		app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
-			/* favourite name */
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Label().Class().For(f.favouriteInput.Id).Text("Favourites Name"),
-			),
-			app.Div().Class("col-span-2 flex items-center").Body(
-				f.favouriteInput,
-			),
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Span().
-					Class("text-sm text-red-500").
-					Text(""),
-			),
+		app.Form().Action("javascript:void(0);").AutoComplete(false).Body(
 
-			/* version */
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Label().Class().For("version").Text("Version"),
-			),
-			app.Div().Class("col-span-2 flex items-center").Body(
-				f.versionInput,
-			),
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Span().
-					Class("text-sm text-red-500").
-					Text(""),
-			),
+			app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
+				/* favourite name */
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Label().Class("font-kanitBold").For(f.favouriteInput.Id).Text("Favourites Name"),
+				),
+				app.Div().Class("col-span-2 flex items-center").Body(
+					f.favouriteInput,
+				),
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Span().
+						Class("text-sm text-red-500").
+						Text(""),
+				),
 
-			/* host */
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Label().Class().For(f.hostInput.Id).Text("Host"),
-			),
-			app.Div().Class("col-span-2 flex items-center").Body(
-				f.hostInput,
-			),
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Span().
-					Class("text-sm text-red-500").
-					Text(core.Error(f.hostInput.ValidateError)),
-			),
+				/* version */
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Label().Class("font-kanitBold").For("version").Text("Version"),
+				),
+				app.Div().Class("col-span-2 flex items-center").Body(
+					f.versionInput,
+				),
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Span().
+						Class("text-sm text-red-500").
+						Text(""),
+				),
 
-			/* username */
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Label().Class().For(f.usernameInput.Id).Text("Username"),
-			),
-			app.Div().Class("col-span-2 flex items-center").Body(
-				f.usernameInput,
-			),
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Span().
-					Class("text-sm text-red-500").
-					Text(core.Error(f.usernameInput.ValidateError)),
-			),
+				/* host */
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Label().Class("font-kanitBold").For(f.hostInput.Id).Text("Host"),
+				),
+				app.Div().Class("col-span-2 flex items-center").Body(
+					f.hostInput,
+				),
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Span().
+						Class("text-sm text-red-500").
+						Text(core.Error(f.hostInput.ValidateError)),
+				),
 
-			/* password */
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Label().Class().For(f.passwordInput.Id).Text("Password"),
-			),
-			app.Div().Class("col-span-2 flex items-center").Body(
-				f.passwordInput,
-			),
-			app.Div().Class("col-span-1 flex items-center").Body(
-				app.Span().
-					Class("text-sm text-red-500").
-					Text(core.Error(f.passwordInput.ValidateError)),
-			),
+				/* username */
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Label().Class("font-kanitBold").For(f.usernameInput.Id).Text("Username"),
+				),
+				app.Div().Class("col-span-2 flex items-center").Body(
+					f.usernameInput,
+				),
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Span().
+						Class("text-sm text-red-500").
+						Text(core.Error(f.usernameInput.ValidateError)),
+				),
 
-			/* empty */
-			app.Span(),
+				/* password */
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Label().Class("font-kanitBold").For(f.passwordInput.Id).Text("Password"),
+				),
+				app.Div().Class("col-span-2 flex items-center").Body(
+					f.passwordInput,
+				),
+				app.Div().Class("col-span-1 flex items-center").Body(
+					app.Span().
+						Class("text-sm text-red-500").
+						Text(core.Error(f.passwordInput.ValidateError)),
+				),
 
-			/* button */
-			app.Div().Class("col-span-2 flex flex-row items-center justify-end gap-4").Body(
-				elements.NewButton(constants.BUTTON_STYLE_SECONDARY).
-					Text("Save").
-					OnClick(f.save),
-				elements.NewButton(constants.BUTTON_STYLE_PRIMARY).
-					ID("connect").
-					Text("Connect").
-					OnClick(f.connect),
+				/* empty */
+				app.Span(),
+
+				/* button */
+				app.Div().Class("col-span-2 flex flex-row items-center justify-end gap-4").Body(
+					elements.NewButton(constants.BUTTON_STYLE_SECONDARY, f.isFormDisabled()).
+						Text("Save").
+						OnClick(f.save),
+					elements.NewButton(constants.BUTTON_STYLE_PRIMARY, false).
+						ID("connect").
+						Text("Connect").
+						OnClick(f.connect),
+				),
 			),
 		),
 	)

@@ -44,7 +44,7 @@ html {
   -o-tab-size: 4;
      tab-size: 4;
   /* 3 */
-  font-family: Kanit-Regular, Kanit-Light, Kanit-Bold;
+  font-family: Kanit-Light, Kanit-Regular;
   /* 4 */
   font-feature-settings: normal;
   /* 5 */
@@ -452,12 +452,6 @@ video {
   src: url("../../fonts/Kanit-Light.ttf") format('truetype');
 }
 
-@font-face {
-  font-family: 'Kanit-Bold';
-
-  src: url("../../fonts/Kanit-Bold.ttf") format('truetype');
-}
-
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -674,6 +668,10 @@ video {
   align-items: center;
 }
 
+.justify-start {
+  justify-content: flex-start;
+}
+
 .justify-end {
   justify-content: flex-end;
 }
@@ -745,6 +743,11 @@ video {
   --tw-border-opacity: 0.5;
 }
 
+.bg-gray-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
+}
+
 .bg-primary-base {
   --tw-bg-opacity: 1;
   background-color: rgb(38 70 83 / var(--tw-bg-opacity));
@@ -801,7 +804,7 @@ video {
 }
 
 .font-kanitBold {
-  font-family: Kanit-Bold;
+  font-family: Kanit-Regular;
 }
 
 .text-3xl {

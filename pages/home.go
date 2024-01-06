@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"fmt"
-
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
@@ -10,18 +8,42 @@ import (
 )
 
 const (
-	navHeaderTitle = "New Connection"
-	tagConnection  = "ConnectionList"
+	navHeaderTitle    = "New Connection"
+	tagConnection     = "ConnectionList"
+	tagNav            = "Nav"
+	tagNavHeader      = "NavHeader"
+	tagFormConnection = "FormConnection"
 )
 
 type Home struct {
 	app.Compo
 
+	/* component */
+	nav            *components.Nav
+	navHeader      *components.NavHeader
+	formConnection *components.FormConnection
+
+	/* state data */
 	connectionList []*models.ConnectionList
 }
 
 func (h *Home) ConnectionList() []*models.ConnectionList {
 	return h.connectionList
+}
+func (h *Home) Nav() *components.Nav {
+	return h.nav
+}
+func (h *Home) NavHeader() *components.NavHeader {
+	return h.navHeader
+}
+func (h *Home) FormConnection() *components.FormConnection {
+	return h.formConnection
+}
+
+func (h *Home) OnInit() {
+	h.nav = components.NewNav(h, components.NavProp{ConnectionList: h.connectionList})
+	h.navHeader = components.NewNavHeader(components.NavHeaderProp{Title: navHeaderTitle})
+	h.formConnection = components.NewFormConnection(h, components.FormConnectionProp{})
 }
 
 func (h *Home) getDataStorage(ctx app.Context) error {
@@ -33,10 +55,7 @@ func (h *Home) getDataStorage(ctx app.Context) error {
 
 func (h *Home) OnMount(ctx app.Context) {
 	h.getDataStorage(ctx)
-}
-
-func (h *Home) OnNav(ctx app.Context) {
-	fmt.Println("on nav")
+	h.nav.Prop.ConnectionList = h.connectionList
 }
 
 func (h *Home) Event(ctx app.Context, event constants.Event, data interface{}) {
@@ -47,6 +66,13 @@ func (h *Home) Event(ctx app.Context, event constants.Event, data interface{}) {
 				app.Log(err)
 				return
 			}
+			h.nav.Prop.ConnectionList = h.connectionList
+			h.nav.Update()
+		}
+	case constants.EVENT_FILL_DATA_FORM_CONNECTION:
+		if connection, ok := data.(*models.ConnectionList); ok {
+			h.formConnection.Prop.Connection = connection
+			h.formConnection.Event(ctx, constants.EVENT_FILL_DATA_FORM_CONNECTION, connection)
 		}
 	}
 
@@ -55,13 +81,11 @@ func (h *Home) Event(ctx app.Context, event constants.Event, data interface{}) {
 
 func (h *Home) Render() app.UI {
 	return app.Div().Class("flex w-screen h-screen").Body(
-		&components.Nav{
-			ConnectionList: h.connectionList,
-		},
+		h.nav,
 		app.Div().Class("flext flex-col w-full").Body(
-			components.NewNavHeader(components.NavHeaderProp{Title: navHeaderTitle}),
+			h.navHeader,
 			app.Div().Class().Body(
-				&components.FormConnection{Parent: h},
+				h.formConnection,
 			),
 		),
 	)

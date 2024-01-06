@@ -15,6 +15,9 @@ const (
 	*/
 	EVENT_ON_SELECT
 
+	/* fill data form connection */
+	EVENT_FILL_DATA_FORM_CONNECTION
+
 	/* update data something */
 	EVENT_UPDATE
 )
