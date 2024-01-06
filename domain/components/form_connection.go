@@ -111,6 +111,33 @@ func (f *FormConnection) OnInit() {
 	})
 }
 
+func (f *FormConnection) OnDismount(ctx app.Context) {
+	f.Prop.Connection = nil
+	f.favouriteInput = nil
+	f.hostInput = nil
+	f.usernameInput = nil
+	f.passwordInput = nil
+}
+
+func (f *FormConnection) clear() {
+	f.favouriteInput.BaseInput.Disabled = false
+	f.versionInput.DropdownProp.Disable = false
+	f.hostInput.BaseInput.Disabled = false
+	f.usernameInput.BaseInput.Disabled = false
+	f.passwordInput.BaseInput.Disabled = false
+	f.favouriteInput.SetValue("")
+	f.versionInput.SetValue(versionDefaultIndex)
+	f.hostInput.SetValue("")
+	f.usernameInput.SetValue("")
+	f.passwordInput.SetValue("")
+
+	f.favouriteInput.Update()
+	f.versionInput.Update()
+	f.hostInput.Update()
+	f.usernameInput.Update()
+	f.passwordInput.Update()
+}
+
 func (f *FormConnection) Event(ctx app.Context, event constants.Event, data interface{}) {
 	switch event {
 	case constants.EVENT_ON_VALIDATE_INPUT:
@@ -151,6 +178,8 @@ func (f *FormConnection) Event(ctx app.Context, event constants.Event, data inte
 			f.usernameInput.Update()
 			f.passwordInput.Update()
 		}
+	case constants.EVENT_CLEAR_DATA_FROM_CONNECTION:
+		f.clear()
 	}
 	f.Update()
 }

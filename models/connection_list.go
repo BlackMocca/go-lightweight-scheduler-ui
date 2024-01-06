@@ -37,3 +37,24 @@ func (c *ConnectionList) GetDecodePassword() string {
 	bu, _ := hex.DecodeString(c.Password)
 	return string(bu)
 }
+
+func (list ConnectionLists) FindById(id *uuid.UUID) int {
+	var index = -1
+	if len(list) > 0 {
+		for index, item := range list {
+			if item.Id.String() == id.String() {
+				return index
+			}
+		}
+	}
+	return index
+}
+
+func (list ConnectionLists) Remove(index int) []*ConnectionList {
+	if index == 0 && len(list) == 1 {
+		return make([]*ConnectionList, 0)
+	}
+	newLists := append(list[:index], list[index+1:]...)
+
+	return newLists
+}

@@ -4,6 +4,7 @@ import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
+	"github.com/gofrs/uuid"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
@@ -53,6 +54,17 @@ func (h *Home) getDataStorage(ctx app.Context) error {
 	return nil
 }
 
+func (h *Home) deleteConnectionList(ctx app.Context, connectionId *uuid.UUID) {
+	if index := models.ConnectionLists(h.connectionList).FindById(connectionId); index != -1 {
+		h.connectionList = models.ConnectionLists(h.connectionList).Remove(index)
+		h.nav.Prop.ConnectionList = h.connectionList
+
+		if err := ctx.LocalStorage().Set(string(constants.STORAGE_CONNECTION_LIST), h.connectionList); err != nil {
+			app.Log(err)
+		}
+	}
+}
+
 func (h *Home) OnMount(ctx app.Context) {
 	h.getDataStorage(ctx)
 	h.nav.Prop.ConnectionList = h.connectionList
@@ -73,6 +85,14 @@ func (h *Home) Event(ctx app.Context, event constants.Event, data interface{}) {
 		if connection, ok := data.(*models.ConnectionList); ok {
 			h.formConnection.Prop.Connection = connection
 			h.formConnection.Event(ctx, constants.EVENT_FILL_DATA_FORM_CONNECTION, connection)
+		}
+	case constants.EVENT_CLEAR_DATA_FROM_CONNECTION:
+		h.formConnection.Prop.Connection = nil
+		h.formConnection.Event(ctx, constants.EVENT_CLEAR_DATA_FROM_CONNECTION, nil)
+
+	case constants.EVENT_DELETE_DATA_FROM_CONNECTION:
+		if formId, ok := data.(*uuid.UUID); ok {
+			h.deleteConnectionList(ctx, formId)
 		}
 	}
 
