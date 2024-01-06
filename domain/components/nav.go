@@ -68,18 +68,20 @@ func (n *Nav) Render() app.UI {
 					ptr := n.Prop.ConnectionList[i]
 					title := fmt.Sprintf("[%s] %s", strings.ToLower(ptr.Version), ptr.Favourites)
 					subTitle := ptr.Host
-					return app.Li().Class("flex flex-row p-2 hover:bg-secondary-base hover:bg-opacity-25 hover:cursor-pointer").
+					return app.Li().Class("flex flex-row hover:bg-secondary-base hover:bg-opacity-25").
 						ID(fmt.Sprintf("form-connection-id-%d", i)).
-						OnClick(n.onClickConnectionList).
 						Attr("index", i).
 						Body(
-							app.Div().Class("w-[calc(100%-1rem)]").Body(
-								app.P().Class("truncate").Text(title),
-								app.P().Class("text-sm text-gray-300 truncate").Text(subTitle),
-							),
-							app.Div().Class("pointer-cursor").OnClick(n.onDeleteConnectionList).Body(
-								app.Img().Class("w-4 opacity-50").Src(iconDelete),
-							),
+							app.Div().Class("w-[calc(100%-1rem)] p-2 hover:cursor-pointer").
+								OnClick(n.onClickConnectionList).
+								Body(
+									app.P().Class("truncate").Text(title),
+									app.P().Class("text-sm text-gray-300 truncate").Text(subTitle),
+								),
+							app.Div().Class("p-2 flex pointer-cursor items-center justify-center").
+								Body(
+									app.Img().Class("w-4 opacity-50 hover:cursor-pointer").Src(iconDelete).OnClick(n.onDeleteConnectionList),
+								),
 						)
 				})),
 			),
