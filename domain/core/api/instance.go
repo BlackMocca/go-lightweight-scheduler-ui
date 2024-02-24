@@ -1,13 +1,11 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-)
-
-var (
-	API_SCHEDULER *instance
 )
 
 type instance struct {
@@ -16,10 +14,32 @@ type instance struct {
 	timeout int
 }
 
-func (i instance) getClient(host string, debug bool) *resty.Client {
+func (i instance) getClient() *resty.Client {
 	client := resty.New()
 	client.SetDebug(i.debug)
 	client.SetBaseURL(i.host)
 	client.SetTimeout(time.Minute * time.Duration(i.timeout))
 	return client
+}
+
+func _getValueJSON(resp *resty.Response, bodyKey string) []byte {
+	var m = make(map[string]interface{})
+	json.Unmarshal(resp.Body(), &m)
+	bu, _ := json.Marshal(m[bodyKey])
+	return bu
+}
+
+func _getError(resp *resty.Response) (statusCode int, err error) {
+	var m = make(map[string]interface{})
+	json.Unmarshal(resp.Body(), &m)
+	return resp.StatusCode(), errors.New(m["message"].(string))
+}
+
+func extractResponse(resp *resty.Response, bodyKey string) (statusCode int, body []byte, err error) {
+	statusCode, err = _getError(resp)
+	if err != nil {
+		return statusCode, nil, err
+	}
+	body = _getValueJSON(resp, bodyKey)
+	return
 }

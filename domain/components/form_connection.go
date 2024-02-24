@@ -1,10 +1,13 @@
 package components
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/elements"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
@@ -36,11 +39,12 @@ type FormConnection struct {
 	Prop   FormConnectionProp
 
 	/* internal state format auto call method from GetData with template ${upper}fieldName*/
-	favouriteInput *elements.InputText
-	hostInput      *elements.InputText
-	usernameInput  *elements.InputText
-	passwordInput  *elements.InputText
-	versionInput   *elements.Dropdown
+	favouriteInput  *elements.InputText
+	hostInput       *elements.InputText
+	usernameInput   *elements.InputText
+	passwordInput   *elements.InputText
+	versionInput    *elements.Dropdown
+	connectionError string
 }
 
 func NewFormConnection(parent core.ParentNotify, prop FormConnectionProp) *FormConnection {
@@ -260,7 +264,16 @@ func (f *FormConnection) save(ctx app.Context, e app.Event) {
 func (f *FormConnection) connect(ctx app.Context, e app.Event) {
 	/* handle connect */
 	connection := f.getForm()
-	app.Log(connection)
+	if connection == nil {
+		return
+	}
+
+	api.SchedulerAPI.SetHost(connection.Host).SetBasicAuth(connection.Username, connection.GetDecodePassword())
+
+	_, err := api.SchedulerAPI.FetchListDag(nil)
+	if err != nil {
+		f.connectionError = err.Error()
+	}
 }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
@@ -274,8 +287,12 @@ func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 
 func (f *FormConnection) Render() app.UI {
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
+		app.If(f.connectionError != "",
+			app.Div().Class("flex w-full h-12 p-2 mb-6 bg-red-200 items-center").Body(
+				app.H1().Class("text-red-500 just").Text(fmt.Sprintf("ERROR: %s", strings.ToUpper(f.connectionError))),
+			),
+		),
 		app.Form().Action("javascript:void(0);").AutoComplete(false).Body(
-
 			app.Div().Class("w-full h-full grid grid-cols-4 gap-4 text-base").Body(
 				/* favourite name */
 				app.Div().Class("col-span-1 flex items-center").Body(
