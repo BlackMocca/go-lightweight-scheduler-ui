@@ -32,7 +32,10 @@ func _getValueJSON(resp *resty.Response, bodyKey string) []byte {
 func _getError(resp *resty.Response) (statusCode int, err error) {
 	var m = make(map[string]interface{})
 	json.Unmarshal(resp.Body(), &m)
-	return resp.StatusCode(), errors.New(m["message"].(string))
+	if msg, ok := m["message"]; ok {
+		return resp.StatusCode(), errors.New(msg.(string))
+	}
+	return resp.StatusCode(), nil
 }
 
 func extractResponse(resp *resty.Response, bodyKey string) (statusCode int, body []byte, err error) {

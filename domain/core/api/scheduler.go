@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -64,7 +63,6 @@ func (s *schedulerAPI) FetchListDag(querparams url.Values) ([]*models.Dag, error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(body)
 	var ptrs = make([]*models.Dag, 0)
 
 	if statusCode == http.StatusOK {

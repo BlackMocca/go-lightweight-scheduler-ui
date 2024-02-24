@@ -2,6 +2,7 @@ package core
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
@@ -32,4 +33,11 @@ func Error(err error) string {
 func NewUUID() *uuid.UUID {
 	uid, _ := uuid.NewV4()
 	return &uid
+}
+
+func Hidden(err error, elemStyles ...string) string {
+	if err == nil {
+		elemStyles = append(elemStyles, "hidden")
+	}
+	return strings.Join(elemStyles, " ")
 }

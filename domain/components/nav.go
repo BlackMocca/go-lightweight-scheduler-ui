@@ -2,7 +2,6 @@ package components
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
@@ -66,7 +65,7 @@ func (n *Nav) Render() app.UI {
 					// )
 					*/
 					ptr := n.Prop.ConnectionList[i]
-					title := fmt.Sprintf("[%s] %s", strings.ToLower(ptr.Version), ptr.Favourites)
+					title := ptr.Favourites
 					subTitle := ptr.Host
 					return app.Li().Class("flex flex-row hover:bg-secondary-base hover:bg-opacity-25").
 						ID(fmt.Sprintf("form-connection-id-%d", i)).
@@ -80,7 +79,7 @@ func (n *Nav) Render() app.UI {
 								),
 							app.Div().Class("w-1/5 flex p-1 pointer-cursor items-center justify-center").
 								Body(
-									app.Img().Class("p-2 opacity-50 hover:cursor-pointer").Src(iconDelete).OnClick(n.onDeleteConnectionList),
+									app.Img().Attr("index", i).Class("p-2 opacity-50 hover:cursor-pointer").Src(iconDelete).OnMouseDown(n.onDeleteConnectionList),
 								),
 						)
 				})),
