@@ -72,15 +72,15 @@ func (n *Nav) Render() app.UI {
 						ID(fmt.Sprintf("form-connection-id-%d", i)).
 						Attr("index", i).
 						Body(
-							app.Div().Class("w-[calc(100%-1rem)] p-2 hover:cursor-pointer").
+							app.Div().Class("w-[calc(100%-1.5rem)] p-2 hover:cursor-pointer").
 								OnClick(n.onClickConnectionList).
 								Body(
 									app.P().Class("truncate").Text(title),
 									app.P().Class("text-sm text-gray-300 truncate").Text(subTitle),
 								),
-							app.Div().Class("p-2 flex pointer-cursor items-center justify-center").
+							app.Div().Class("flex p-1 pointer-cursor items-center justify-center").
 								Body(
-									app.Img().Class("w-4 opacity-50 hover:cursor-pointer").Src(iconDelete).OnClick(n.onDeleteConnectionList),
+									app.Img().Class("opacity-50 hover:cursor-pointer").Src(iconDelete).OnClick(n.onDeleteConnectionList),
 								),
 						)
 				})),
