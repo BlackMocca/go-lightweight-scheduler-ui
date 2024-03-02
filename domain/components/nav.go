@@ -17,9 +17,22 @@ const (
 	iconSignout       = string(constants.ICON_SIGN_OUT)
 )
 
+const (
+	PAGE_DAG_INDEX     = 0
+	PAGE_JOB_INDEX     = 1
+	PAGE_HISTORY_INDEX = 2
+)
+
+type navigate struct {
+	display   string
+	path      string
+	pageIndex int
+}
+
 type NavProp struct {
 	ConnectionList []*models.ConnectionList
 	IsInSession    bool
+	PageIndex      int
 }
 
 type Nav struct {
@@ -60,11 +73,16 @@ func (n *Nav) OnMount(ctx app.Context) {
 		app.Log(err)
 		return
 	}
+	if connectionVal == nil {
+		ctx.Navigate("/")
+	}
+
 	connection, connectionOK := connectionVal.(*models.ConnectionList)
 	if connectionOK {
 		n.currentConnection = *connection
-		app.Log("Hi", connection)
+		return
 	}
+
 }
 
 func (n *Nav) onSignout(ctx app.Context, e app.Event) {
@@ -77,7 +95,16 @@ func (n *Nav) OnDismount(ctx app.Context, e app.Event) {
 }
 
 func (n *Nav) Render() app.UI {
-	return app.Div().Class("flex flex-col h-screen w-2/12 bg-primary-base shadow-lg").Body(
+	var navigates = make([]navigate, 0)
+	if n.Prop.IsInSession && n.currentConnection.Version != "" {
+		navigates = append(navigates,
+			navigate{display: "Dag", path: fmt.Sprintf("/%s/dag", n.currentConnection.Version), pageIndex: PAGE_DAG_INDEX},
+			navigate{display: "Job", path: fmt.Sprintf("/%s/job", n.currentConnection.Version), pageIndex: PAGE_JOB_INDEX},
+			navigate{display: "History", path: fmt.Sprintf("/%s/history", n.currentConnection.Version), pageIndex: PAGE_HISTORY_INDEX},
+		)
+	}
+
+	return app.Div().Class("flex flex-col h-screen w-2/12 bg-primary-base shadow-lg overflow-hidden").Body(
 		app.Div().Class("w-full h-32 p-4 text-center border-b-0.5 border-secondary-base border-opacity-50").Body(
 			app.Img().Class("w-full h-full").Src(logo),
 		),
@@ -103,23 +130,20 @@ func (n *Nav) Render() app.UI {
 		app.Div().Class("text-secondary-base").Body(
 			/* list after login */
 			app.Ul().Class(core.Hidden(!n.Prop.IsInSession, "")).Body(
-				app.Li().Class("p-2 pl-4 text-xl hover:bg-secondary-base hover:bg-opacity-25 hover:cursor-pointer").Body(
-					app.A().Class("").Href("#").Text("DAG"),
-				),
-				app.Li().Class("p-2 pl-4 text-xl hover:bg-secondary-base hover:bg-opacity-25 hover:cursor-pointer").Body(
-					app.A().Class("").Href("#").Text("JOB"),
-				),
-				app.Li().Class("p-2 pl-4 text-xl hover:bg-secondary-base hover:bg-opacity-25 hover:cursor-pointer").Body(
-					app.A().Class("").Href("#").Text("HISTORY"),
-				),
-			),
-			app.Div().Class(core.Hidden(!n.Prop.IsInSession, "absolute bottom-0 w-full")).Body(
-				app.Div().Class(core.Hidden(!n.Prop.IsInSession, "flex flex-row text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25")).
-					OnClick(n.onSignout).
-					Body(
-						app.Img().Class("w-6").Src(iconSignout),
-						app.P().Class("text-base").Text("Signout"),
-					),
+				app.If(len(navigates) > 0, app.Range(navigates).Slice(func(i int) app.UI {
+					activeStyle := "p-2 pl-4 text-xl bg-secondary-base bg-opacity-25 cursor-pointer"
+					style := "p-2 pl-4 text-xl hover:bg-secondary-base hover:bg-opacity-25 hover:cursor-pointer"
+					if n.Prop.PageIndex == navigates[i].pageIndex {
+						style = activeStyle
+					}
+					return app.Li().Class(style).
+						OnClick(func(ctx app.Context, e app.Event) {
+							ctx.Navigate(navigates[i].path)
+						}).
+						Body(
+							app.P().Class().Text(navigates[i].display),
+						)
+				})),
 			),
 
 			/* connection form not login */
@@ -145,6 +169,15 @@ func (n *Nav) Render() app.UI {
 						)
 				})),
 			),
+		),
+
+		app.Div().Class(core.Hidden(!n.Prop.IsInSession, "mt-auto overflow-hidden w-full")).Body(
+			app.Div().Class(core.Hidden(!n.Prop.IsInSession, "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25")).
+				OnClick(n.onSignout).
+				Body(
+					app.Img().Class("w-6").Src(iconSignout),
+					app.P().Class("text-base").Text("Signout"),
+				),
 		),
 	)
 }

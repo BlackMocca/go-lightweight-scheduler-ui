@@ -13,8 +13,8 @@ type Base struct {
 func (d *Base) Event(ctx app.Context, event constants.Event, data interface{}) {
 }
 
-func (h *Base) Content(content app.UI) app.UI {
-	h.nav = components.NewNav(h, components.NavProp{IsInSession: true})
+func (h *Base) Content(pageIndex int, content app.UI) app.UI {
+	h.nav = components.NewNav(h, components.NavProp{IsInSession: true, PageIndex: pageIndex})
 
 	return app.Div().Class("w-screen h-screen bg-secondary-base").ID("root").Body(
 		app.Div().Class("flex w-screen h-screen").Body(
