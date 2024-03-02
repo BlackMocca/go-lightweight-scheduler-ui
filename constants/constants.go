@@ -15,6 +15,7 @@ const (
 	ICON_ADD_SECONDARY    AssetPath = "/web/resources/assets/icon/add_secondary_color.svg"
 	ICON_DELETE_PRIMARY   AssetPath = "/web/resources/assets/icon/bin_primary_color.svg"
 	ICON_DELETE_SECONDARY AssetPath = "/web/resources/assets/icon/bin_secondary_color.svg"
+	ICON_SETTING          AssetPath = "/web/resources/assets/icon/setting.svg"
 	ICON_SIGN_OUT         AssetPath = "/web/resources/assets/icon/signout.svg"
 )
 

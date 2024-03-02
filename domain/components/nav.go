@@ -14,10 +14,12 @@ const (
 	logo              = string(constants.LOGO_NO_BACKGROUND)
 	iconNewConnection = string(constants.ICON_ADD_SECONDARY)
 	iconDelete        = string(constants.ICON_DELETE_SECONDARY)
+	iconSetting       = string(constants.ICON_SETTING)
 	iconSignout       = string(constants.ICON_SIGN_OUT)
 )
 
 const (
+	PAGE_NONE_INDEX    = -1
 	PAGE_DAG_INDEX     = 0
 	PAGE_JOB_INDEX     = 1
 	PAGE_HISTORY_INDEX = 2
@@ -172,6 +174,14 @@ func (n *Nav) Render() app.UI {
 		),
 
 		app.Div().Class(core.Hidden(!n.Prop.IsInSession, "mt-auto overflow-hidden w-full")).Body(
+			app.Div().Class(core.Hidden(!n.Prop.IsInSession, "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25")).
+				OnClick(func(ctx app.Context, e app.Event) {
+					ctx.Navigate("/v1/setting")
+				}).
+				Body(
+					app.Img().Class("w-6").Src(iconSetting),
+					app.P().Class("text-base").Text("Setting"),
+				),
 			app.Div().Class(core.Hidden(!n.Prop.IsInSession, "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25")).
 				OnClick(n.onSignout).
 				Body(
