@@ -13,6 +13,8 @@ type sessionKey string
 const (
 	SESSION_CONNECTTED       sessionKey = "connected"        // if connected store models.ConnectionList
 	SESSION_SETTING_INTERVAL sessionKey = "setting-interval" // if connected store int
+	SESSION_SETTING_TIMEOUT  sessionKey = "setting-timeout"  // if connected store timeout
+	SESSION_SETTING_DEBUG    sessionKey = "setting-debug"    // if connected store boolean
 )
 
 func SetSession(ctx app.Context, key sessionKey, val interface{}) error {
@@ -36,6 +38,10 @@ func GetSession(ctx app.Context, key sessionKey) (interface{}, error) {
 			return ptr, nil
 		case SESSION_SETTING_INTERVAL:
 			return cast.ToInt(val), nil
+		case SESSION_SETTING_TIMEOUT:
+			return cast.ToInt(val), nil
+		case SESSION_SETTING_DEBUG:
+			return cast.ToBool(val), nil
 		}
 	}
 	return val, err

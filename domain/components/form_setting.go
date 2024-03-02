@@ -22,6 +22,7 @@ type FormSetting struct {
 	intervalSecondInput *elements.InputText
 	apiTimeoutInput     *elements.InputText
 	apiDebugInput       *elements.InputText
+	isSuccess           bool
 }
 
 func (s *FormSetting) IntervalSecondInput() *elements.InputText {
@@ -34,11 +35,46 @@ func (s *FormSetting) ApiDebugInput() *elements.InputText {
 	return s.apiDebugInput
 }
 
+func (s *FormSetting) OnDismount() {
+	s.isSuccess = false
+	s.intervalSecondInput = nil
+	s.apiTimeoutInput = nil
+	s.apiDebugInput = nil
+}
+
+func (s *FormSetting) OnNav(ctx app.Context) {
+	interval, err := core.GetSession(ctx, core.SESSION_SETTING_INTERVAL)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	if interval != nil {
+		s.intervalSecondInput.SetValue(cast.ToString(interval))
+		s.intervalSecondInput.Update()
+	}
+	timeout, err := core.GetSession(ctx, core.SESSION_SETTING_TIMEOUT)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	if timeout != nil {
+		s.apiTimeoutInput.SetValue(cast.ToString(timeout))
+	}
+	debug, err := core.GetSession(ctx, core.SESSION_SETTING_DEBUG)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	if debug != nil {
+		s.apiDebugInput.SetValue(cast.ToString(debug))
+	}
+}
+
 func (s *FormSetting) OnInit() {
 	s.intervalSecondInput = elements.NewInputText(s, tagIntervalSecondInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:           "host",
-			PlaceHolder:  "http://127.0.0.1:3000",
+			PlaceHolder:  "5000",
 			Required:     true,
 			Disabled:     false,
 			Value:        constants.GetEnv("API_INTERVAL_MILLISECOND", "5000"),
@@ -48,7 +84,7 @@ func (s *FormSetting) OnInit() {
 	s.apiTimeoutInput = elements.NewInputText(s, tagApiTimeoutInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:           "host",
-			PlaceHolder:  "http://127.0.0.1:3000",
+			PlaceHolder:  "30",
 			Required:     true,
 			Disabled:     false,
 			Value:        constants.GetEnv("API_TIMEOUT", "30"),
@@ -58,7 +94,7 @@ func (s *FormSetting) OnInit() {
 	s.apiDebugInput = elements.NewInputText(s, tagApiDebugInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:           "host",
-			PlaceHolder:  "http://127.0.0.1:3000",
+			PlaceHolder:  "false",
 			Required:     true,
 			Disabled:     false,
 			Value:        constants.GetEnv("API_DEBUG", "false"),
@@ -119,16 +155,28 @@ func (s *FormSetting) save(ctx app.Context, e app.Event) {
 	var timeout = s.apiTimeoutInput.GetValue()
 	var debug = s.apiDebugInput.GetValue()
 
-	app.Log(interval, timeout, debug)
-
 	api.SchedulerAPI.SetTimeout(cast.ToInt64(timeout)).SetDebug(cast.ToBool(debug))
 	if err := core.SetSession(ctx, core.SESSION_SETTING_INTERVAL, cast.ToInt(interval)); err != nil {
 		app.Log(err)
+		return
 	}
+	if err := core.SetSession(ctx, core.SESSION_SETTING_TIMEOUT, cast.ToInt(timeout)); err != nil {
+		app.Log(err)
+		return
+	}
+	if err := core.SetSession(ctx, core.SESSION_SETTING_DEBUG, cast.ToBool(debug)); err != nil {
+		app.Log(err)
+		return
+	}
+
+	s.isSuccess = true
 }
 
 func (s *FormSetting) Render() app.UI {
 	return app.Div().Class("w-10/12 p-4 pl-8").Body(
+		app.Div().Class(core.Hidden(!s.isSuccess, "flex w-full h-12 p-2 mb-6 bg-green-200 items-center")).Body(
+			app.H1().Class().Text("Saved Successful"),
+		),
 		app.Form().Action("javascript:void(0);").AutoComplete(false).Body(
 			app.Div().Class("w-full h-full grid grid-cols-5 gap-4 text-base").Body(
 				/* interval input */
