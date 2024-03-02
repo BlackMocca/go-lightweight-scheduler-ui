@@ -35,8 +35,8 @@ func NewUUID() *uuid.UUID {
 	return &uid
 }
 
-func Hidden(err error, elemStyles ...string) string {
-	if err == nil {
+func Hidden(expr bool, elemStyles ...string) string {
+	if expr {
 		elemStyles = append(elemStyles, "hidden")
 	}
 	return strings.Join(elemStyles, " ")

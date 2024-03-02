@@ -275,7 +275,16 @@ func (f *FormConnection) connect(ctx app.Context, e app.Event) {
 	_, err := api.SchedulerAPI.FetchListDag(nil)
 	if err != nil {
 		f.connectionError = err
+		return
 	}
+
+	if err := core.SetSession(ctx, core.SESSION_CONNECTTED, connection); err != nil {
+		f.connectionError = err
+		return
+	}
+
+	path := fmt.Sprintf("/%s/dag", connection.Version)
+	ctx.Navigate(path)
 }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
@@ -289,7 +298,7 @@ func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {
 
 func (f *FormConnection) Render() app.UI {
 	return app.Div().Class("w-6/12 p-4 pl-8").OnKeyPress(f.onKeypress).Body(
-		app.Div().Class(core.Hidden(f.connectionError, "flex w-full h-12 p-2 mb-6 bg-red-200 items-center")).Body(
+		app.Div().Class(core.Hidden((f.connectionError == nil), "flex w-full h-12 p-2 mb-6 bg-red-200 items-center")).Body(
 			app.H1().Class("text-red-500 just").Text(fmt.Sprintf("ERROR: %s", strings.ToUpper(core.Error(f.connectionError)))),
 		),
 		app.Form().Action("javascript:void(0);").AutoComplete(false).Body(

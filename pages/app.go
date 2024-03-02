@@ -6,8 +6,6 @@ import (
 
 type App struct {
 	app.Compo
-
-	isInConnect bool /* already connect scheduler api waiting for disconnect */
 }
 
 func (h *App) Render() app.UI {

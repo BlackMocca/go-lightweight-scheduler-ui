@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/pages"
+	pageV1 "github.com/Blackmocca/go-lightweight-scheduler-ui/pages/v1"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
@@ -60,6 +61,7 @@ func main() {
 	ctx := context.Background()
 	// Components routing:
 	app.Route("/", &pages.App{})
+	app.Route("/v1/dag", &pageV1.Dag{Base: pageV1.Base{}})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:
