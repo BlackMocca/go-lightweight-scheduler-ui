@@ -19,10 +19,8 @@ func (h *Base) Content(pageIndex int, content app.UI) app.UI {
 	return app.Div().Class("w-screen h-screen bg-secondary-base").ID("root").Body(
 		app.Div().Class("flex w-screen h-screen").Body(
 			h.nav,
-			app.Div().Class("flex w-full").Body(
-				app.Div().Class().Body(
-					content,
-				),
+			app.Div().Class("flex w-full h-full").Body(
+				content,
 			),
 		),
 	)

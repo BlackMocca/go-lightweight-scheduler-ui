@@ -12,5 +12,11 @@ type Setting struct {
 }
 
 func (d *Setting) Render() app.UI {
-	return d.Base.Content(components.PAGE_NONE_INDEX, app.P().Class("asdasd").Text("asdadsasdsa"))
+	return d.Base.Content(components.PAGE_NONE_INDEX,
+		app.Div().Class("w-full h-full").Body(
+			components.NewNavHeader(components.NavHeaderProp{Title: "Setting"}),
+
+			&components.FormSetting{},
+		),
+	)
 }

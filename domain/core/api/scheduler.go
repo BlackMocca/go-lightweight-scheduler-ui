@@ -33,6 +33,15 @@ func (s *schedulerAPI) getClient() *resty.Client {
 	return s.instance.getClient().SetBasicAuth(s.username, s.password)
 }
 
+func (s *schedulerAPI) SetDebug(debug bool) *schedulerAPI {
+	s.instance.debug = debug
+	return s
+}
+func (s *schedulerAPI) SetTimeout(milliseconds int64) *schedulerAPI {
+	seconds := float64(milliseconds) / 1000.0
+	s.instance.timeout = int(seconds)
+	return s
+}
 func (s *schedulerAPI) SetHost(host string) *schedulerAPI {
 	s.instance.host = host
 	return s

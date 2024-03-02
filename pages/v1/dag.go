@@ -15,5 +15,9 @@ func (d *Dag) OnInit() {
 }
 
 func (d *Dag) Render() app.UI {
-	return d.Base.Content(components.PAGE_DAG_INDEX, app.P().Class("asdasd").Text("asdadsasdsa"))
+	return d.Base.Content(components.PAGE_DAG_INDEX,
+		app.Div().Class("w-full h-full").Body(
+			app.P().Class("asdasd").Text("asdadsasdsa"),
+		),
+	)
 }

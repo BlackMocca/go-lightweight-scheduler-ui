@@ -23,6 +23,7 @@ const (
 	PAGE_DAG_INDEX     = 0
 	PAGE_JOB_INDEX     = 1
 	PAGE_HISTORY_INDEX = 2
+	PAGE_SETTING_INDEX = 3
 )
 
 type navigate struct {
@@ -105,9 +106,13 @@ func (n *Nav) Render() app.UI {
 			navigate{display: "History", path: fmt.Sprintf("/%s/history", n.currentConnection.Version), pageIndex: PAGE_HISTORY_INDEX},
 		)
 	}
+	var settingStyle = "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25"
+	if n.Prop.PageIndex == PAGE_SETTING_INDEX {
+		settingStyle = "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start cursor-pointer bg-secondary-base bg-opacity-25"
+	}
 
 	return app.Div().Class("flex flex-col h-screen w-2/12 bg-primary-base shadow-lg overflow-hidden").Body(
-		app.Div().Class("w-full h-32 p-4 text-center border-b-0.5 border-secondary-base border-opacity-50").Body(
+		app.Div().Class("w-full h-28 p-4 border-b-0.5 border-secondary-base border-opacity-50").Body(
 			app.Img().Class("w-full h-full").Src(logo),
 		),
 
@@ -174,7 +179,7 @@ func (n *Nav) Render() app.UI {
 		),
 
 		app.Div().Class(core.Hidden(!n.Prop.IsInSession, "mt-auto overflow-hidden w-full")).Body(
-			app.Div().Class(core.Hidden(!n.Prop.IsInSession, "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25")).
+			app.Div().Class(core.Hidden(!n.Prop.IsInSession, settingStyle)).
 				OnClick(func(ctx app.Context, e app.Event) {
 					ctx.Navigate("/v1/setting")
 				}).

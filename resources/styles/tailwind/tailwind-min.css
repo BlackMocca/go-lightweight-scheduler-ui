@@ -620,8 +620,8 @@ video {
   height: 3rem;
 }
 
-.h-32 {
-  height: 8rem;
+.h-28 {
+  height: 7rem;
 }
 
 .h-5 {
@@ -638,6 +638,10 @@ video {
 
 .w-1\/5 {
   width: 20%;
+}
+
+.w-10\/12 {
+  width: 83.333333%;
 }
 
 .w-2\/12 {
@@ -678,6 +682,10 @@ video {
 
 .grid-cols-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .flex-row {
@@ -850,16 +858,12 @@ video {
   text-align: left;
 }
 
-.text-center {
-  text-align: center;
-}
-
 .font-kanitBold {
   font-family: Kanit-Regular;
 }
 
-.text-3xl {
-  font-size: 1.953rem;
+.text-2xl {
+  font-size: 1.563rem;
 }
 
 .text-base {

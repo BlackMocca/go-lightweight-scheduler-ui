@@ -5,12 +5,14 @@ import (
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/spf13/cast"
 )
 
 type sessionKey string
 
 const (
-	SESSION_CONNECTTED sessionKey = "connected" // if connected store models.ConnectionList
+	SESSION_CONNECTTED       sessionKey = "connected"        // if connected store models.ConnectionList
+	SESSION_SETTING_INTERVAL sessionKey = "setting-interval" // if connected store int
 )
 
 func SetSession(ctx app.Context, key sessionKey, val interface{}) error {
@@ -32,6 +34,8 @@ func GetSession(ctx app.Context, key sessionKey) (interface{}, error) {
 			json.Unmarshal(bu, &ptr)
 
 			return ptr, nil
+		case SESSION_SETTING_INTERVAL:
+			return cast.ToInt(val), nil
 		}
 	}
 	return val, err
