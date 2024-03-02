@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/spf13/cast"
@@ -45,4 +46,36 @@ func GetSession(ctx app.Context, key sessionKey) (interface{}, error) {
 		}
 	}
 	return val, err
+}
+
+func SetSchedulerAPIIfSession(ctx app.Context) {
+	val, err := GetSession(ctx, SESSION_CONNECTTED)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	if val != nil {
+		con := val.(*models.ConnectionList)
+		api.SchedulerAPI.SetHost(con.Host).SetBasicAuth(con.Username, con.GetDecodePassword())
+	}
+
+	val, err = GetSession(ctx, SESSION_SETTING_TIMEOUT)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	if val != nil {
+		timeout := val.(int)
+		api.SchedulerAPI.SetTimeout(int64(timeout))
+	}
+
+	val, err = GetSession(ctx, SESSION_SETTING_DEBUG)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	if val != nil {
+		debug := val.(bool)
+		api.SchedulerAPI.SetDebug(debug)
+	}
 }

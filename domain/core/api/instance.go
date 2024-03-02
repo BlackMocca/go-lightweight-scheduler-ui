@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -44,5 +46,10 @@ func extractResponse(resp *resty.Response, bodyKey string) (statusCode int, body
 		return statusCode, nil, err
 	}
 	body = _getValueJSON(resp, bodyKey)
+
+	if statusCode > 400 && err == nil {
+		body = nil
+		err = fmt.Errorf("%d %s", statusCode, http.StatusText(statusCode))
+	}
 	return
 }

@@ -1,5 +1,11 @@
 package constants
 
+import (
+	"strings"
+
+	"github.com/lnquy/cron"
+)
+
 type LocalStorageKey string
 
 const (
@@ -17,8 +23,28 @@ const (
 	ICON_DELETE_SECONDARY AssetPath = "/web/resources/assets/icon/bin_secondary_color.svg"
 	ICON_SETTING          AssetPath = "/web/resources/assets/icon/setting.svg"
 	ICON_SIGN_OUT         AssetPath = "/web/resources/assets/icon/signout.svg"
+	ICON_PLAY             AssetPath = "/web/resources/assets/icon/play.svg"
+)
+
+const (
+	DATE_LAYOUT      = "2006-01-02"
+	TIMESTAMP_LAYOUT = "2006-01-02 15:04:05"
 )
 
 var (
-// SVG_RING_WEDDING_STRING   = GetSVGString("assets/icon/rings-wedding.svg")
+	CRONJOB_READABLE = func(cronExpression string) (string, error) {
+		if cronExpression == "" {
+			return "-", nil
+		}
+		exprDesc, _ := cron.NewDescriptor(
+			cron.Use24HourTimeFormat(true),
+			cron.DayOfWeekStartsAtOne(false),
+		)
+
+		desc, err := exprDesc.ToDescription(cronExpression, cron.Locale_en)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(desc), nil
+	}
 )
