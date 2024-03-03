@@ -75,7 +75,9 @@ func (s *schedulerAPI) FetchListDag(querparams url.Values) ([]*models.Dag, error
 	var ptrs = make([]*models.Dag, 0)
 
 	if statusCode == http.StatusOK {
-		json.Unmarshal(body, &ptrs)
+		if err := json.Unmarshal(body, &ptrs); err != nil {
+			return nil, err
+		}
 	}
 
 	return ptrs, nil

@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"time"
 )
 
 type Dag struct {
@@ -10,9 +9,9 @@ type Dag struct {
 	CronjobExpression string                 `json:"cronjob_expression"`
 	IsRunning         bool                   `json:"is_running"`
 	Arguments         map[string]interface{} `json:"arguments"`
-	LastRun           time.Time              `json:"last_run"`
-	NextRun           time.Time              `json:"next_run"`
-	PreviousRun       time.Time              `json:"previous_run"`
+	LastRun           Timestamp              `json:"last_run,omitempty"`
+	NextRun           Timestamp              `json:"next_run,omitempty"`
+	PreviousRun       Timestamp              `json:"previous_run,omitempty"`
 	Config            DagConfig              `json:"config"`
 	Tasks             []Task                 `json:"tasks"`
 }

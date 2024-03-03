@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
@@ -43,6 +44,16 @@ func GetSession(ctx app.Context, key sessionKey) (interface{}, error) {
 			return cast.ToInt(val), nil
 		case SESSION_SETTING_DEBUG:
 			return cast.ToBool(val), nil
+		}
+	}
+	if val == nil {
+		switch key {
+		case SESSION_SETTING_INTERVAL:
+			return cast.ToInt(constants.GetEnv("API_INTERVAL_MILLISECOND", "5000")), nil
+		case SESSION_SETTING_TIMEOUT:
+			return cast.ToInt(constants.GetEnv("API_TIMEOUT", "30")), nil
+		case SESSION_SETTING_DEBUG:
+			return cast.ToBool(constants.GetEnv("API_DEBUG", "true")), nil
 		}
 	}
 	return val, err
