@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
@@ -11,6 +12,7 @@ import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -48,35 +50,35 @@ func (d *Dag) fillDag() {
 func (d *Dag) OnNav(ctx app.Context) {
 	core.SetSchedulerAPIIfSession(ctx)
 	d.fillDag()
-	dag := &models.Dag{
-		Name: "tmp",
-	}
-	d.dags = append(d.dags, dag, dag, dag, dag)
-
-	// interval, err := core.GetSession(ctx, core.SESSION_SETTING_INTERVAL)
-	// if err != nil {
-	// 	app.Log(err)
-	// 	return
+	// dag := &models.Dag{
+	// 	Name: "tmp",
 	// }
-	// go d.intervalFetchDataDag(cast.ToInt(interval))
+	// d.dags = append(d.dags, dag, dag, dag, dag)
+
+	interval, err := core.GetSession(ctx, core.SESSION_SETTING_INTERVAL)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	go d.intervalFetchDataDag(cast.ToInt(interval))
 }
 
 func (d *Dag) OnDismount(ctx app.Context) {
 	d.intervalCancel()
 }
 
-// func (d *Dag) intervalFetchDataDag(millisec int) {
-// 	for {
-// 		select {
-// 		case <-d.intervalCtx.Done():
-// 			return
-// 		default:
-// 			time.Sleep(time.Duration(millisec) * time.Millisecond)
-// 			/* fetch dag */
-// 			d.fillDag()
-// 		}
-// 	}
-// }
+func (d *Dag) intervalFetchDataDag(millisec int) {
+	for {
+		select {
+		case <-d.intervalCtx.Done():
+			return
+		default:
+			time.Sleep(time.Duration(millisec) * time.Millisecond)
+			/* fetch dag */
+			d.fillDag()
+		}
+	}
+}
 
 func (d *Dag) onClickRunDag(ctx app.Context, e app.Event) {
 
