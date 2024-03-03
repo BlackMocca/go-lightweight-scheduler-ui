@@ -283,8 +283,7 @@ func (f *FormConnection) connect(ctx app.Context, e app.Event) {
 		return
 	}
 
-	path := fmt.Sprintf("/%s/dag", connection.Version)
-	ctx.Navigate(path)
+	ctx.Navigate("/console/dag")
 }
 
 func (f *FormConnection) onKeypress(ctx app.Context, e app.Event) {

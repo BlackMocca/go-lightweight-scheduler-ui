@@ -37,7 +37,7 @@ func (d *Dag) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 }
 
-func (d *Dag) fillDag() {
+func (d *Dag) fillDag(context.Context) {
 	dags, err := api.SchedulerAPI.FetchListDag(nil)
 	if err != nil {
 		app.Log(err)
@@ -49,7 +49,7 @@ func (d *Dag) fillDag() {
 
 func (d *Dag) OnNav(ctx app.Context) {
 	core.SetSchedulerAPIIfSession(ctx)
-	d.fillDag()
+	d.fillDag(d.intervalCtx)
 	// dag := &models.Dag{
 	// 	Name: "tmp",
 	// }
@@ -63,7 +63,7 @@ func (d *Dag) OnNav(ctx app.Context) {
 	go d.intervalFetchDataDag(cast.ToInt(interval))
 }
 
-func (d *Dag) OnDismount(ctx app.Context) {
+func (d *Dag) OnDismount() {
 	d.intervalCancel()
 }
 
@@ -73,9 +73,9 @@ func (d *Dag) intervalFetchDataDag(millisec int) {
 		case <-d.intervalCtx.Done():
 			return
 		default:
-			time.Sleep(time.Duration(millisec) * time.Millisecond)
+			time.Sleep(time.Duration(millisec/1000) * time.Second)
 			/* fetch dag */
-			d.fillDag()
+			d.fillDag(d.intervalCtx)
 		}
 	}
 }

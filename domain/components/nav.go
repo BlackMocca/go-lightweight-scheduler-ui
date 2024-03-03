@@ -101,9 +101,9 @@ func (n *Nav) Render() app.UI {
 	var navigates = make([]navigate, 0)
 	if n.Prop.IsInSession && n.currentConnection.Version != "" {
 		navigates = append(navigates,
-			navigate{display: "Dag", path: fmt.Sprintf("/%s/dag", n.currentConnection.Version), pageIndex: PAGE_DAG_INDEX},
-			navigate{display: "Job", path: fmt.Sprintf("/%s/job", n.currentConnection.Version), pageIndex: PAGE_JOB_INDEX},
-			navigate{display: "History", path: fmt.Sprintf("/%s/history", n.currentConnection.Version), pageIndex: PAGE_HISTORY_INDEX},
+			navigate{display: "Dag", path: "/console/dag", pageIndex: PAGE_DAG_INDEX},
+			navigate{display: "Job", path: "/console/job", pageIndex: PAGE_JOB_INDEX},
+			navigate{display: "History", path: "/console/history", pageIndex: PAGE_HISTORY_INDEX},
 		)
 	}
 	var settingStyle = "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25"
@@ -181,7 +181,7 @@ func (n *Nav) Render() app.UI {
 		app.Div().Class(core.Hidden(!n.Prop.IsInSession, "mt-auto overflow-hidden w-full")).Body(
 			app.Div().Class(core.Hidden(!n.Prop.IsInSession, settingStyle)).
 				OnClick(func(ctx app.Context, e app.Event) {
-					ctx.Navigate("/v1/setting")
+					ctx.Navigate("/console/setting")
 				}).
 				Body(
 					app.Img().Class("w-6").Src(iconSetting),

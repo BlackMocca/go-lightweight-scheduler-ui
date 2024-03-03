@@ -61,8 +61,8 @@ func main() {
 	ctx := context.Background()
 	// Components routing:
 	app.Route("/", &pages.App{})
-	app.Route("/v1/dag", &pageV1.Dag{Base: pageV1.Base{}})
-	app.Route("/v1/setting", &pageV1.Setting{Base: pageV1.Base{}})
+	app.Route("/console/dag", &pageV1.Dag{Base: pageV1.Base{}})
+	app.Route("/console/setting", &pageV1.Setting{Base: pageV1.Base{}})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:
