@@ -1055,6 +1055,10 @@ video {
   --tw-ring-opacity: 0.05;
 }
 
+.\[dataSTD\:dataEND\] {
+  data-s-t-d: dataEND;
+}
+
 .hover\:cursor-pointer:hover {
   cursor: pointer;
 }

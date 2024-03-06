@@ -30,11 +30,13 @@ type Dag struct {
 	intervalCtx    context.Context
 	intervalCancel context.CancelFunc
 	dags           []*models.Dag
+	paginator      models.Paginator
 	err            error
 }
 
 func (d *Dag) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
+	d.paginator = models.NewDefaultPaginator(10)
 }
 
 func (d *Dag) fillDag(context.Context) {
@@ -45,6 +47,10 @@ func (d *Dag) fillDag(context.Context) {
 		return
 	}
 	d.dags = dags
+
+	if len(dags) > 0 {
+		d.paginator.SetFromTotalRows(int64(len(dags)))
+	}
 }
 
 func (d *Dag) OnNav(ctx app.Context) {
@@ -85,6 +91,7 @@ func (d *Dag) onClickRunDag(ctx app.Context, e app.Event) {
 }
 
 func (d *Dag) Render() app.UI {
+	dataSTD, dataEND := d.paginator.GetRangeData()
 	return d.Base.Content(components.PAGE_DAG_INDEX,
 		app.Div().Class("w-full h-full").Body(
 			components.NewNavHeader(components.NavHeaderProp{Title: "Dag"}),
@@ -106,8 +113,8 @@ func (d *Dag) Render() app.UI {
 							),
 						),
 						app.TBody().Class("font-kanit").Body(
-							app.If((len(d.dags) > 0), app.Range(d.dags).Slice(func(i int) app.UI {
-								dag := d.dags[i]
+							app.If((len(d.dags) > 0), app.Range(d.dags[dataSTD:dataEND]).Slice(func(i int) app.UI {
+								dag := d.dags[dataSTD:dataEND][i]
 								cronReadable, _ := constants.CRONJOB_READABLE(dag.CronjobExpression)
 								var expression = dag.CronjobExpression
 								if expression == "" {
@@ -131,27 +138,40 @@ func (d *Dag) Render() app.UI {
 					),
 					app.Div().Class("flex w-full pt-4 pb-4 px-6 py-3").Body(
 						app.Div().Class("flex text-md text-gray-700 items-center").Body(
-							app.P().Class().Text("Showing 1 to 10 of 97 results"),
+							app.P().Class().Text(fmt.Sprintf("Showing %d to %d Total %d results (%d / %d)", dataSTD+1, dataEND, d.paginator.TotalRows, d.paginator.Page, d.paginator.TotalPage)),
 						),
 						app.Nav().Class("ml-auto isolate inline-flex -space-x-px rounded-md shadow-sm").Body(
-							app.Div().Class("relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").Body(
-								app.Img().Class("w-5 h-5").Src(iconLeftArrow),
-							),
-							app.Div().Class("relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base").Body(
-								app.P().Text("1"),
-							),
-							app.Div().Class("relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").Body(
-								app.P().Text("2"),
-							),
-							app.Div().Class("relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").Body(
-								app.P().Text("3"),
-							),
-							app.Div().Class("relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").Body(
-								app.P().Text("4"),
-							),
-							app.Div().Class("relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").Body(
-								app.Img().Class("w-5 h-5").Src(iconRightArrow),
-							),
+							app.Div().Class("relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").
+								Body(
+									app.Img().Class("w-5 h-5").Src(iconLeftArrow),
+								).OnClick(func(ctx app.Context, e app.Event) {
+								if d.paginator.Page > 1 {
+									d.paginator.Page--
+								}
+							}),
+							app.If((len(d.dags) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
+								var selectedStyle = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 focus:z-20 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base"
+								var style = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer"
+								var page = d.paginator.GetNavPagination(d.paginator.Page)[i]
+								if int64(d.paginator.Page) == page {
+									style = selectedStyle
+								}
+
+								return app.Div().Class(style).Body(
+									app.P().Text(page),
+								).OnClick(func(ctx app.Context, e app.Event) {
+									d.paginator.Page = int(page)
+								})
+							})),
+							app.Div().Class("relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").
+								OnClick(func(ctx app.Context, e app.Event) {
+									if d.paginator.Page < int(d.paginator.TotalPage) {
+										d.paginator.Page++
+									}
+								}).
+								Body(
+									app.Img().Class("w-5 h-5").Src(iconRightArrow),
+								),
 						),
 					),
 				),
