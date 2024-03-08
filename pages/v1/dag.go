@@ -37,6 +37,7 @@ type Dag struct {
 func (d *Dag) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 	d.paginator = models.NewDefaultPaginator(10)
+	d.modalDagrun = components.ModalDagrun{}
 }
 
 func (d *Dag) fillDag(context.Context) {
@@ -87,7 +88,8 @@ func (d *Dag) intervalFetchDataDag(millisec int) {
 }
 
 func (d *Dag) onClickRunDag(ctx app.Context, e app.Event) {
-
+	d.Base.modalDagrun.Visible = true
+	d.Base.modalDagrun.Update()
 }
 
 func (d *Dag) Render() app.UI {
@@ -141,7 +143,7 @@ func (d *Dag) Render() app.UI {
 							app.P().Class().Text(fmt.Sprintf("Showing %d to %d Total %d results (%d / %d)", dataSTD+1, dataEND, d.paginator.TotalRows, d.paginator.Page, d.paginator.TotalPage)),
 						),
 						app.Nav().Class("ml-auto isolate inline-flex -space-x-px rounded-md shadow-sm").Body(
-							app.Div().Class("relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").
+							app.Div().Class("relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer").
 								Body(
 									app.Img().Class("w-5 h-5").Src(iconLeftArrow),
 								).OnClick(func(ctx app.Context, e app.Event) {
@@ -150,8 +152,8 @@ func (d *Dag) Render() app.UI {
 								}
 							}),
 							app.If((len(d.dags) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
-								var selectedStyle = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 focus:z-20 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base"
-								var style = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer"
+								var selectedStyle = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base"
+								var style = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer"
 								var page = d.paginator.GetNavPagination(d.paginator.Page)[i]
 								if int64(d.paginator.Page) == page {
 									style = selectedStyle
@@ -163,7 +165,7 @@ func (d *Dag) Render() app.UI {
 									d.paginator.Page = int(page)
 								})
 							})),
-							app.Div().Class("relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 hover:cursor-pointer").
+							app.Div().Class("relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer").
 								OnClick(func(ctx app.Context, e app.Event) {
 									if d.paginator.Page < int(d.paginator.TotalPage) {
 										d.paginator.Page++

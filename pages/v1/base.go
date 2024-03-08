@@ -7,7 +7,8 @@ import (
 )
 
 type Base struct {
-	nav *components.Nav
+	nav         *components.Nav
+	modalDagrun components.ModalDagrun
 }
 
 func (d *Base) Event(ctx app.Context, event constants.Event, data interface{}) {
@@ -17,6 +18,7 @@ func (h *Base) Content(pageIndex int, content app.UI) app.UI {
 	h.nav = components.NewNav(h, components.NavProp{IsInSession: true, PageIndex: pageIndex})
 
 	return app.Div().Class("w-screen h-screen bg-secondary-base").ID("root").Body(
+		&h.modalDagrun,
 		app.Div().Class("flex w-screen h-screen").Body(
 			h.nav,
 			app.Div().Class("flex w-full h-full").Body(

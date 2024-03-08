@@ -26,6 +26,7 @@ const (
 	ICON_PLAY                   AssetPath = "/web/resources/assets/icon/play.svg"
 	ICON_PAGINATION_LEFT_ARROW  AssetPath = "/web/resources/assets/icon/pagination_left_arrow.svg"
 	ICON_PAGINATION_RIGHT_ARROW AssetPath = "/web/resources/assets/icon/pagination_right_arrow.svg"
+	ICON_CLOSE                  AssetPath = "/web/resources/assets/icon/close.svg"
 )
 
 const (
