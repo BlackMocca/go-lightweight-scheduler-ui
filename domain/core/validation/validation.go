@@ -1,6 +1,9 @@
 package validation
 
 import (
+	"encoding/json"
+	"errors"
+
 	validator "github.com/go-ozzo/ozzo-validation/v4"
 	rule "github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/spf13/cast"
@@ -33,6 +36,22 @@ var (
 		return validator.Validate(val, validator.By(func(value interface{}) error {
 			_, err := cast.ToBoolE(value)
 			return err
+		}))
+	}
+	Json ValidateRule = func(val interface{}) error {
+		return validator.Validate(val, validator.By(func(value interface{}) error {
+			v := cast.ToString(value)
+			if v == "" {
+				return nil
+			}
+			m := map[string]interface{}{}
+			if err := json.Unmarshal([]byte(v), &m); err != nil {
+				return err
+			}
+			if len(m) == 0 && v != "" {
+				return errors.New("must be json string")
+			}
+			return nil
 		}))
 	}
 )

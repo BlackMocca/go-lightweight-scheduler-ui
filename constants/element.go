@@ -5,6 +5,7 @@ type InputType string
 const (
 	INPUT_TYPE_TEXT     InputType = "text"
 	INPUT_TYPE_PASSWORD InputType = "password"
+	INPUT_TYPE_DATETIME InputType = "datetime-local"
 )
 
 type ButtonStyle int

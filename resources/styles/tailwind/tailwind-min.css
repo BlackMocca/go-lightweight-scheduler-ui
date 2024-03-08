@@ -552,6 +552,10 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.visible {
+  visibility: visible;
+}
+
 .fixed {
   position: fixed;
 }
@@ -644,12 +648,12 @@ video {
   height: 7rem;
 }
 
-.h-5 {
-  height: 1.25rem;
+.h-48 {
+  height: 12rem;
 }
 
-.h-\[80\%\] {
-  height: 80%;
+.h-5 {
+  height: 1.25rem;
 }
 
 .h-full {
@@ -724,6 +728,10 @@ video {
   cursor: pointer;
 }
 
+.resize-none {
+  resize: none;
+}
+
 .grid-cols-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -754,6 +762,10 @@ video {
 
 .justify-center {
   justify-content: center;
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 
 .gap-4 {
@@ -842,6 +854,11 @@ video {
 .border-gray-500 {
   --tw-border-opacity: 1;
   border-color: rgb(107 114 128 / var(--tw-border-opacity));
+}
+
+.border-primary-base {
+  --tw-border-opacity: 1;
+  border-color: rgb(38 70 83 / var(--tw-border-opacity));
 }
 
 .border-red-500 {
@@ -950,6 +967,11 @@ video {
 .py-3 {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .pb-4 {
@@ -1089,6 +1111,11 @@ video {
   --tw-ring-color: rgb(239 68 68 / var(--tw-ring-opacity));
 }
 
+.ring-slate-300 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(203 213 225 / var(--tw-ring-opacity));
+}
+
 .ring-opacity-5 {
   --tw-ring-opacity: 0.05;
 }
@@ -1149,4 +1176,9 @@ video {
 
 .focus\:outline-offset-0:focus {
   outline-offset: 0px;
+}
+
+.focus\:ring-blue-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity));
 }

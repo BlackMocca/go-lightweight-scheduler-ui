@@ -88,8 +88,8 @@ func (d *Dag) intervalFetchDataDag(millisec int) {
 }
 
 func (d *Dag) onClickRunDag(ctx app.Context, e app.Event) {
-	d.Base.modalDagrun.Visible = true
-	d.Base.modalDagrun.Update()
+	var dagId = ctx.JSSrc().Call("getAttribute", "dag-id").String()
+	d.Base.modalDagrun.Visible(dagId)
 }
 
 func (d *Dag) Render() app.UI {
@@ -129,6 +129,7 @@ func (d *Dag) Render() app.UI {
 									app.Td().Class("px-6 py-3 text-wrap").Text(dag.NextRun.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
 									app.Td().Class("px-6 py-3 text-wrap").Body(
 										app.Div().Class("w-6 hover:cursor-pointer").
+											Attr("dag-id", dag.Name).
 											OnClick(d.onClickRunDag).
 											Body(
 												app.Img().Class("w-full").Src(iconPlay),
@@ -140,7 +141,7 @@ func (d *Dag) Render() app.UI {
 					),
 					app.Div().Class("flex w-full pt-4 pb-4 px-6 py-3").Body(
 						app.Div().Class("flex text-md text-gray-700 items-center").Body(
-							app.P().Class().Text(fmt.Sprintf("Showing %d to %d Total %d results (%d / %d)", dataSTD+1, dataEND, d.paginator.TotalRows, d.paginator.Page, d.paginator.TotalPage)),
+							app.P().Class().Text(fmt.Sprintf("Showing %d to %d Total %d results (page %d of %d)", dataSTD+1, dataEND, d.paginator.TotalRows, d.paginator.Page, d.paginator.TotalPage)),
 						),
 						app.Nav().Class("ml-auto isolate inline-flex -space-x-px rounded-md shadow-sm").Body(
 							app.Div().Class("relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer").
