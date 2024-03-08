@@ -1,8 +1,13 @@
 package components
 
 import (
+	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/elements"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
@@ -26,6 +31,7 @@ type ModalDagrun struct {
 	dagNameInput     *elements.InputText
 	executionDtInput *elements.InputDatetime
 	configInput      *elements.InputTextArea
+	isTrigger        bool
 }
 
 func (m *ModalDagrun) DagNameInput() *elements.InputText {
@@ -73,6 +79,7 @@ func (m *ModalDagrun) OnDismount() {
 	m.dagNameInput = nil
 	m.executionDtInput = nil
 	m.visible = false
+	m.isTrigger = false
 }
 
 func (m *ModalDagrun) Event(ctx app.Context, event constants.Event, data interface{}) {
@@ -150,18 +157,34 @@ func (m *ModalDagrun) onClose(ctx app.Context, e app.Event) {
 }
 
 func (m *ModalDagrun) onRun(ctx app.Context, e app.Event) {
+	m.isTrigger = true
+	defer func() {
+		m.isTrigger = false
+	}()
 	if !m.isValidatePass() {
 		return
 	}
-	app.Log("validate success")
 
 	dagnameVal := m.dagNameInput.GetValue()
 	exeDtVal := m.executionDtInput.GetValue()
 	configVal := m.configInput.GetValue()
 
-	app.Log(dagnameVal)
-	app.Log(exeDtVal)
-	app.Log(configVal)
+	exdt, _ := time.Parse("2006-01-02T15:04", exeDtVal)
+
+	var config map[string]interface{}
+	if configVal != "" {
+		if err := json.Unmarshal([]byte(configVal), &config); err != nil {
+			app.Log(err)
+			return
+		}
+	}
+
+	jobId, err := api.SchedulerAPI.TriggerDag(dagnameVal, exdt, config)
+	if err != nil {
+		app.Log(err)
+		return
+	}
+	fmt.Println(jobId)
 }
 
 func (m *ModalDagrun) Render() app.UI {
@@ -219,7 +242,7 @@ func (m *ModalDagrun) Render() app.UI {
 			),
 			/* button */
 			app.Div().Class("flex flex-row items-center justify-end gap-4").Body(
-				elements.NewButton(constants.BUTTON_STYLE_PRIMARY, false).
+				elements.NewButton(constants.BUTTON_STYLE_PRIMARY, m.isTrigger).
 					ID("dagrunBtn").
 					Text("Run").
 					OnClick(m.onRun),

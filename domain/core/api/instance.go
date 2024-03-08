@@ -47,7 +47,7 @@ func extractResponse(resp *resty.Response, bodyKey string) (statusCode int, body
 	}
 	body = _getValueJSON(resp, bodyKey)
 
-	if statusCode > 400 && err == nil {
+	if statusCode >= 400 && err == nil {
 		body = nil
 		err = fmt.Errorf("%d %s", statusCode, http.StatusText(statusCode))
 	}

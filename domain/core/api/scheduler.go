@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/go-resty/resty/v2"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/cast"
 )
@@ -58,7 +61,7 @@ func (s *schedulerAPI) execute(method string, path string, querparams url.Values
 	req.SetQueryParamsFromValues(querparams)
 	req.SetBody(body)
 	if body != nil {
-		req.SetHeader(echo.MIMEApplicationJSON, echo.MIMEApplicationJSONCharsetUTF8)
+		req.SetHeader(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 	}
 	return req.Execute(method, path)
 }
@@ -81,4 +84,24 @@ func (s *schedulerAPI) FetchListDag(querparams url.Values) ([]*models.Dag, error
 	}
 
 	return ptrs, nil
+}
+
+func (s *schedulerAPI) TriggerDag(dagname string, executeDt time.Time, config map[string]interface{}) (*uuid.UUID, error) {
+	reqbody := map[string]interface{}{
+		"name":             dagname,
+		"execute_datetime": executeDt.Format("2006-01-02T15:04:05+07:00"),
+		"config":           config,
+	}
+	resp, err := s.execute(echo.POST, "/v1/scheduler/triggers", nil, reqbody)
+	if err != nil {
+		return nil, err
+	}
+
+	_, respbody, err := extractResponse(resp, "job_id")
+	if err != nil {
+		return nil, err
+	}
+	jobId := uuid.FromStringOrNil(strings.Trim(string(respbody), `"`))
+
+	return &jobId, nil
 }
