@@ -130,7 +130,7 @@ func (d *JobDetail) Render() app.UI {
 					app.Div().Class("flex flex-col px-3 py-4 w-full h-full").Body(
 						app.H1().Class("text-xl border-b rounded-t py-3").Text(d.job.SchedulerName),
 					),
-					app.Div().Class("flex flex-rows px-3 w-full text-center justify-end gap-2").Body(
+					app.Div().Class("flex flex-rows px-3 pb-2 w-full text-center justify-end gap-2").Body(
 						app.Range(d.masterStatusList).Slice(func(i int) app.UI {
 							statusText := string(d.masterStatusList[i])
 							return app.Div().Class("flex flex-rows text-center justify-center gap-1").Body(
@@ -139,10 +139,10 @@ func (d *JobDetail) Render() app.UI {
 							)
 						}),
 					),
-					app.Div().Class("flex flex-rows px-3 py-4 w-full text-center justify-center overflow-y-auto h-overflow").Body(
+					app.Div().Class("flex flex-rows px-3 w-full text-center justify-center overflow-y-auto h-overflow").Body(
 						app.Div().Class("w-1/2").Body(
 							app.P().Class("text-xl py-1 font-kanitBold bg-slate-300 bg-opacity-50").Text("Infomation"),
-							app.Table().Class("w-full table-fixed").Body(
+							app.Table().Class("w-full h-full table-fixed").Body(
 								app.TBody().Class("border-r-2 border-r").Body(
 									app.Tr().Class("text-start py-1").Body(
 										app.Td().Class("w-2/6 px-1 text-start").Text("JobId"),
@@ -150,9 +150,9 @@ func (d *JobDetail) Render() app.UI {
 									),
 									app.Tr().Class("text-start py-1 text-center bg-slate-200 bg-opacity-25").Body(
 										app.Td().Class("w-2/6 px-1 text-start").Text("Status"),
-										app.Td().Class("flex flex-rows w-3/6 px-1 text-start gap-2").Body(
+										app.Td().Class("flex flex-rows w-3/6 px-1 text-start items-center justify-start gap-2 h-full").Body(
 											app.Div().Class(fmt.Sprintf("w-4 h-4 my-auto %s", statusColor[d.job.Status])),
-											app.P().Text(strings.ToUpper(d.job.Status)),
+											app.P().Class("").Text(strings.ToUpper(d.job.Status)),
 										),
 									),
 									app.Tr().Class("text-start py-1").Body(
