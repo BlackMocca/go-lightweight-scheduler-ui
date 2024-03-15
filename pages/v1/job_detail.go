@@ -19,6 +19,7 @@ import (
 
 const (
 	iconDataNotFound = string(constants.ICON_DATA_NOT_FOUND)
+	iconBottomArrow  = string(constants.ICON_BOTTOM_ARROW)
 )
 
 type statusJob string
@@ -215,29 +216,38 @@ func (d *JobDetail) Render() app.UI {
 						),
 						app.Div().Class("w-1/2").Body(
 							app.P().Class("text-xl py-1 font-kanitBold bg-slate-300 bg-opacity-50").Text("Task"),
-							app.Div().Class("flex flex-col w-full py-4 items-center justify-center gap-12").Body(
-								app.Range(d.dag.Tasks).Slice(func(i int) app.UI {
-									var masterDataTask = d.dag.Tasks[i]
-									var taskStatusStyle = statusRingColor[string(statusWaiting)]
-									var opacity string
-									if len(d.job.JobRunningTasks) > 0 {
-										for _, jobTask := range d.job.JobRunningTasks {
-											if jobTask.Name == masterDataTask.Name {
-												if taskStatus, ok := statusRingColor[jobTask.Status]; ok {
-													taskStatusStyle = taskStatus
-													taskFailIndex = i
+							app.Div().Class("w-full").Body(
+								app.Div().Class("flex flex-col w-full py-4 items-center justify-center").Body(
+									app.Range(d.dag.Tasks).Slice(func(i int) app.UI {
+										var masterDataTask = d.dag.Tasks[i]
+										var taskStatusStyle = statusRingColor[string(statusWaiting)]
+										var opacity string
+										if len(d.job.JobRunningTasks) > 0 {
+											for _, jobTask := range d.job.JobRunningTasks {
+												if jobTask.Name == masterDataTask.Name {
+													if taskStatus, ok := statusRingColor[jobTask.Status]; ok {
+														taskStatusStyle = taskStatus
+														taskFailIndex = i
+													}
 												}
 											}
 										}
-									}
-									if i > taskFailIndex && taskFailIndex != -1 {
-										opacity = "opacity-50"
-									}
-									return app.Div().Class("min-w-2/6 ring-2 rounded p-1 px-2 "+strings.Join([]string{taskStatusStyle, opacity}, " ")).Body(
-										app.P().Class("text-xl").Text(masterDataTask.Name),
-										app.P().Class("text-sm").Text("( "+masterDataTask.ExecutionName+" )"),
-									)
-								}),
+										if i > taskFailIndex && taskFailIndex != -1 {
+											opacity = "opacity-50"
+										}
+										return app.Div().Class().Body(
+											app.Div().Class("min-w-2/6 ring-2 rounded p-1 px-2 "+strings.Join([]string{taskStatusStyle, opacity}, " ")).Body(
+												app.P().Class("text-xl").Text(masterDataTask.Name),
+												app.P().Class("text-sm").Text("( "+masterDataTask.ExecutionName+" )"),
+											),
+											app.Div().Class("w-4 h-12 mx-auto").Body(
+												app.If(i < len(d.dag.Tasks)-1,
+													app.Img().Class("w-full h-full").Src(iconBottomArrow),
+												),
+											),
+										)
+									}),
+								),
 							),
 						),
 					),
