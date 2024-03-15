@@ -63,6 +63,7 @@ func main() {
 	app.Route("/", &pages.App{})
 	app.Route("/console/dag", &pageV1.Dag{Base: pageV1.Base{}})
 	app.Route("/console/setting", &pageV1.Setting{Base: pageV1.Base{}})
+	app.Route("/console/job/detail", &pageV1.JobDetail{Base: pageV1.Base{}})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:

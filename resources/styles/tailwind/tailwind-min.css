@@ -684,6 +684,10 @@ video {
   width: 1rem;
 }
 
+.w-4\/12 {
+  width: 33.333333%;
+}
+
 .w-4\/5 {
   width: 80%;
 }
@@ -1008,6 +1012,10 @@ video {
 
 .text-2xl {
   font-size: 1.563rem;
+}
+
+.text-4xl {
+  font-size: 2.441rem;
 }
 
 .text-base {
