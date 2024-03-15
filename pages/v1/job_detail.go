@@ -11,6 +11,7 @@ import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/elements"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/gofrs/uuid"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
@@ -123,6 +124,12 @@ func (d *JobDetail) intervalFetchDataJob(millisec int) {
 	}
 }
 
+func (d *JobDetail) onClickRunDag(ctx app.Context, e app.Event) {
+	var dagId = d.job.SchedulerName
+	var triggerConfigStr = d.job.Trigger.ConfigString()
+	d.Base.modalDagrun.Visible(dagId, triggerConfigStr)
+}
+
 func (d *JobDetail) Render() app.UI {
 	var showTime = func(dt time.Time) string {
 		if (dt == time.Time{}) {
@@ -148,7 +155,12 @@ func (d *JobDetail) Render() app.UI {
 				/* has job data */
 				app.Div().Class(core.Hidden((d.job.JobID) == ""), "w-full h-full border-2 boder-slate-500 rounded shadow-md").Body(
 					app.Div().Class("flex flex-col px-3 py-4 w-full h-full").Body(
-						app.H1().Class("text-xl border-b rounded-t py-3").Text(d.job.SchedulerName),
+						app.Div().Class("flex flex-rows border-b rounded-t py-3 items-center justify-center").Body(
+							app.H1().Class("text-xl").Text(d.job.SchedulerName),
+							app.Div().Class("ml-auto isolate inline-flex -space-x-px").Body(
+								elements.NewButton(constants.BUTTON_STYLE_PRIMARY, false).Text("Run DAG").OnClick(d.onClickRunDag),
+							),
+						),
 					),
 					app.Div().Class("flex flex-rows px-3 pb-2 w-full text-center justify-end gap-2").Body(
 						app.Range(d.masterStatusList).Slice(func(i int) app.UI {

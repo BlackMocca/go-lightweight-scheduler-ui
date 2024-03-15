@@ -42,6 +42,7 @@ func (i *InputTextArea) GetValue() string {
 
 func (i *InputTextArea) SetValue(value string) *InputTextArea {
 	i.state.value = value
+	defer i.Update()
 	return i
 }
 
@@ -68,5 +69,5 @@ func (i *InputTextArea) Render() app.UI {
 		Placeholder(i.PlaceHolder).
 		Required(i.Required).
 		Rows(i.Row).
-		OnChange(i.onChangeInput)
+		OnChange(i.onChangeInput).Attr("value", i.state.value)
 }

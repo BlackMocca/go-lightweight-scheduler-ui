@@ -138,9 +138,10 @@ func (m *ModalDagrun) isValidatePass() bool {
 	return true
 }
 
-func (m *ModalDagrun) Visible(dagname string) {
+func (m *ModalDagrun) Visible(dagname string, triggerJSONConfig string) {
 	m.dagNameInput.SetValue(dagname)
 	m.dagNameInput.Update()
+	m.configInput.SetValue(triggerJSONConfig)
 	m.visible = true
 	m.Update()
 }

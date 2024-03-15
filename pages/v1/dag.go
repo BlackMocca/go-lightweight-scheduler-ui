@@ -89,7 +89,7 @@ func (d *Dag) intervalFetchDataDag(millisec int) {
 
 func (d *Dag) onClickRunDag(ctx app.Context, e app.Event) {
 	var dagId = ctx.JSSrc().Call("getAttribute", "dag-id").String()
-	d.Base.modalDagrun.Visible(dagId)
+	d.Base.modalDagrun.Visible(dagId, "")
 }
 
 func (d *Dag) Render() app.UI {
