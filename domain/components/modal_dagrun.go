@@ -184,7 +184,9 @@ func (m *ModalDagrun) onRun(ctx app.Context, e app.Event) {
 		app.Log(err)
 		return
 	}
-	fmt.Println(jobId)
+
+	path := fmt.Sprintf("/console/job/detail?job_id=%s", jobId.String())
+	app.Window().Call("openInNewTab", path)
 }
 
 func (m *ModalDagrun) Render() app.UI {

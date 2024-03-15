@@ -9,3 +9,8 @@ window.execCommandCopy = (textToCopy) => {
     
     document.body.removeChild(textArea);
 }
+
+window.openInNewTab = (url) => {
+    var win = window.open(url, '_blank');
+    win.focus();
+}

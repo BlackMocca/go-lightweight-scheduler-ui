@@ -592,6 +592,11 @@ video {
   grid-column: span 2 / span 2;
 }
 
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
 .-mr-1 {
   margin-right: -0.25rem;
 }
@@ -648,6 +653,10 @@ video {
   height: 7rem;
 }
 
+.h-4 {
+  height: 1rem;
+}
+
 .h-48 {
   height: 12rem;
 }
@@ -660,12 +669,20 @@ video {
   height: 100%;
 }
 
+.h-overflow {
+  height: calc(100vh - 280px);
+}
+
 .h-screen {
   height: 100vh;
 }
 
 .max-h-full {
   max-height: 100%;
+}
+
+.w-1\/2 {
+  width: 50%;
 }
 
 .w-1\/5 {
@@ -678,6 +695,14 @@ video {
 
 .w-2\/12 {
   width: 16.666667%;
+}
+
+.w-2\/6 {
+  width: 33.333333%;
+}
+
+.w-3\/6 {
+  width: 50%;
 }
 
 .w-4 {
@@ -724,6 +749,10 @@ video {
   table-layout: auto;
 }
 
+.table-fixed {
+  table-layout: fixed;
+}
+
 .origin-top-right {
   transform-origin: top right;
 }
@@ -768,6 +797,10 @@ video {
   justify-content: center;
 }
 
+.gap-1 {
+  gap: 0.25rem;
+}
+
 .gap-2 {
   gap: 0.5rem;
 }
@@ -805,6 +838,10 @@ video {
   overflow-x: auto;
 }
 
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -838,6 +875,10 @@ video {
   border-width: 1px;
 }
 
+.border-2 {
+  border-width: 2px;
+}
+
 .border-b {
   border-bottom-width: 1px;
 }
@@ -848,6 +889,14 @@ video {
 
 .border-b-0\.5 {
   border-bottom-width: 0.5px;
+}
+
+.border-r {
+  border-right-width: 1px;
+}
+
+.border-r-2 {
+  border-right-width: 2px;
 }
 
 .border-gray-300 {
@@ -889,6 +938,16 @@ video {
   background-color: rgb(187 247 208 / var(--tw-bg-opacity));
 }
 
+.bg-green-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(34 197 94 / var(--tw-bg-opacity));
+}
+
+.bg-orange-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 115 22 / var(--tw-bg-opacity));
+}
+
 .bg-primary-base {
   --tw-bg-opacity: 1;
   background-color: rgb(38 70 83 / var(--tw-bg-opacity));
@@ -899,9 +958,19 @@ video {
   background-color: rgb(254 202 202 / var(--tw-bg-opacity));
 }
 
+.bg-red-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity));
+}
+
 .bg-secondary-base {
   --tw-bg-opacity: 1;
   background-color: rgb(255 250 250 / var(--tw-bg-opacity));
+}
+
+.bg-slate-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity));
 }
 
 .bg-slate-300 {
@@ -936,6 +1005,11 @@ video {
 
 .p-8 {
   padding: 2rem;
+}
+
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
 }
 
 .px-2 {
@@ -1000,6 +1074,14 @@ video {
 
 .text-left {
   text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-start {
+  text-align: start;
 }
 
 .font-kanit {

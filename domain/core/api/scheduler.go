@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -84,6 +85,27 @@ func (s *schedulerAPI) FetchListDag(querparams url.Values) ([]*models.Dag, error
 	}
 
 	return ptrs, nil
+}
+
+func (s *schedulerAPI) FetchJobDetail(jobId *uuid.UUID) (*models.Job, error) {
+	resp, err := s.execute(echo.GET, fmt.Sprintf("/v1/job/%s", jobId.String()), nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	statusCode, body, err := extractResponse(resp, "job")
+	if err != nil {
+		return nil, err
+	}
+
+	if statusCode == http.StatusOK {
+		var ptr = models.Job{}
+		if err := json.Unmarshal(body, &ptr); err != nil {
+			return nil, err
+		}
+		return &ptr, nil
+	}
+
+	return nil, nil
 }
 
 func (s *schedulerAPI) TriggerDag(dagname string, executeDt time.Time, config map[string]interface{}) (*uuid.UUID, error) {
