@@ -675,7 +675,7 @@ video {
 }
 
 .h-overflow {
-  height: calc(100vh - 280px);
+  height: calc(100vh - 290px);
 }
 
 .h-screen {
@@ -706,16 +706,16 @@ video {
   width: 33.333333%;
 }
 
+.w-3\/12 {
+  width: 25%;
+}
+
 .w-3\/6 {
   width: 50%;
 }
 
 .w-4 {
   width: 1rem;
-}
-
-.w-4\/12 {
-  width: 33.333333%;
 }
 
 .w-4\/5 {

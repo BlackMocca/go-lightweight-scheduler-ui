@@ -50,7 +50,7 @@ module.exports = {
         ...defaultColorConfig.theme.colors
       },
       height: {
-        'overflow': 'calc(100vh - 280px)'
+        'overflow': 'calc(100vh - 290px)'
       },
     }
   },

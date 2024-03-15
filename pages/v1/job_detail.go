@@ -267,7 +267,7 @@ func (d *JobDetail) Render() app.UI {
 
 				/* does not has data */
 				app.Div().Class(core.Hidden(d.job.JobID != "", "flex flex-col h-full w-full items-center justify-center gap-4")).Body(
-					app.Img().Class("w-4/12").Src(iconDataNotFound),
+					app.Img().Class("w-3/12").Src(iconDataNotFound),
 					app.H1().Class("text-4xl").Text("DATA NOT FOUND"),
 				),
 			),
