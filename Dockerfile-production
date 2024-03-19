@@ -43,8 +43,7 @@ ENV TZ=Asia/Bangkok
 
 COPY --from=0 /go/src/github.com/BlackMocca/go-lightweight-scheduler-ui/build .
 
-EXPOSE 3000
-EXPOSE 3100
+EXPOSE 8080
 
 CMD ["./app"]  
 
