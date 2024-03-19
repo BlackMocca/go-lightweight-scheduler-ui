@@ -23,27 +23,6 @@ const (
 	iconBottomArrow  = string(constants.ICON_BOTTOM_ARROW)
 )
 
-type statusJob string
-
-var (
-	statusWaiting statusJob = "WAITING"
-	statusRunning statusJob = "RUNNING"
-	statusSuccess statusJob = "SUCCESS"
-	statusFailed  statusJob = "FAILED"
-	statusBgColor           = map[string]string{
-		"WAITING": "bg-slate-300",
-		"RUNNING": "bg-orange-500",
-		"SUCCESS": "bg-green-500",
-		"FAILED":  "bg-red-500",
-	}
-	statusRingColor = map[string]string{
-		"WAITING": "ring-slate-300",
-		"RUNNING": "ring-orange-500",
-		"SUCCESS": "ring-green-500",
-		"FAILED":  "ring-red-500",
-	}
-)
-
 type JobDetail struct {
 	app.Compo
 	/* component */
@@ -128,21 +107,24 @@ func (d *JobDetail) intervalFetchDataJob(millisec int) {
 func (d *JobDetail) onClickRunDag(ctx app.Context, e app.Event) {
 	var dagId = d.job.SchedulerName
 	var triggerConfigStr = d.job.Trigger.ConfigString()
+	if triggerConfigStr == "{}" {
+		triggerConfigStr = ""
+	}
 	d.Base.modalDagrun.Visible(dagId, triggerConfigStr)
 }
 
 func (d *JobDetail) Render() app.UI {
-	var showTime = func(dt time.Time) string {
-		if (dt == time.Time{}) {
+	var showTime = func(dt models.Timestamp) string {
+		if (dt == models.Timestamp{}) {
 			return "-"
 		}
-		return dt.Format(constants.TIMESTAMP_LAYOUT)
+		return dt.ToTime().Format(constants.TIMESTAMP_LAYOUT)
 	}
-	var durationTime = func(end time.Time, start time.Time) string {
-		if (end == time.Time{}) || (start == time.Time{}) {
+	var durationTime = func(end models.Timestamp, start models.Timestamp) string {
+		if (end == models.Timestamp{}) || (start == models.Timestamp{}) {
 			return "-"
 		}
-		return d.job.EndDatetime.Sub(d.job.StartDatetime).Round(time.Second).String()
+		return d.job.EndDatetime.ToTime().Sub(d.job.StartDatetime.ToTime()).Round(time.Second).String()
 	}
 	var taskFailIndex = -1
 	return d.Base.Content(components.PAGE_JOB_INDEX,

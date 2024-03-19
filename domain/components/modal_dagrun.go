@@ -60,6 +60,7 @@ func (m *ModalDagrun) OnInit() {
 			PlaceHolder:  "",
 			Required:     true,
 			Disabled:     false,
+			Value:        time.Now().Format("2006-01-02T15:04"),
 			ValidateFunc: []validation.ValidateRule{validation.Required},
 		},
 	})

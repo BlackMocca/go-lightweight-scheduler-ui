@@ -6,16 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
-	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/spf13/cast"
 )
 
-type Dag struct {
+type Job struct {
 	app.Compo
 	/* component */
 	Base
@@ -23,32 +21,32 @@ type Dag struct {
 	/* value */
 	intervalCtx    context.Context
 	intervalCancel context.CancelFunc
-	dags           []*models.Dag
+	dags           []*models.JobList
 	paginator      models.Paginator
 	err            error
 }
 
-func (d *Dag) OnInit() {
+func (d *Job) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 	d.paginator = models.NewDefaultPaginator(10)
 	d.modalDagrun = components.ModalDagrun{}
 }
 
-func (d *Dag) fillDag(context.Context) {
-	dags, err := api.SchedulerAPI.FetchListDag(nil)
-	if err != nil {
-		app.Log(err)
-		d.err = err
-		return
-	}
-	d.dags = dags
+func (d *Job) fillDag(context.Context) {
+	// dags, err := api.SchedulerAPI.FetchListDag(nil)
+	// if err != nil {
+	// 	app.Log(err)
+	// 	d.err = err
+	// 	return
+	// }
+	// d.dags = dags
 
-	if len(dags) > 0 {
-		d.paginator.SetFromTotalRows(int64(len(dags)))
-	}
+	// if len(dags) > 0 {
+	// 	d.paginator.SetFromTotalRows(int64(len(dags)))
+	// }
 }
 
-func (d *Dag) OnNav(ctx app.Context) {
+func (d *Job) OnNav(ctx app.Context) {
 	core.SetSchedulerAPIIfSession(ctx)
 	d.fillDag(d.intervalCtx)
 	// dag := &models.Dag{
@@ -64,11 +62,11 @@ func (d *Dag) OnNav(ctx app.Context) {
 	go d.intervalFetchDataDag(cast.ToInt(interval))
 }
 
-func (d *Dag) OnDismount() {
+func (d *Job) OnDismount() {
 	d.intervalCancel()
 }
 
-func (d *Dag) intervalFetchDataDag(millisec int) {
+func (d *Job) intervalFetchDataDag(millisec int) {
 	for {
 		select {
 		case <-d.intervalCtx.Done():
@@ -81,14 +79,14 @@ func (d *Dag) intervalFetchDataDag(millisec int) {
 	}
 }
 
-func (d *Dag) onClickRunDag(ctx app.Context, e app.Event) {
+func (d *Job) onClickRunDag(ctx app.Context, e app.Event) {
 	var dagId = ctx.JSSrc().Call("getAttribute", "dag-id").String()
 	d.Base.modalDagrun.Visible(dagId, "")
 }
 
-func (d *Dag) Render() app.UI {
+func (d *Job) Render() app.UI {
 	dataSTD, dataEND := d.paginator.GetRangeData()
-	return d.Base.Content(components.PAGE_DAG_INDEX,
+	return d.Base.Content(components.PAGE_JOB_INDEX,
 		app.Div().Class("w-full h-full").Body(
 			components.NewNavHeader(components.NavHeaderProp{Title: "Dag"}),
 			app.Div().Class("flex flex-col p-8 w-full").Body(
@@ -102,34 +100,36 @@ func (d *Dag) Render() app.UI {
 						app.THead().Class("font-kanitBold border bg-slate-300 bg-opacity-50").Body(
 							app.Tr().Class().Body(
 								app.Th().Class("px-6 py-3").Text("Name"),
-								app.Th().Class("px-6 py-3").Text("Cronjob Expression"),
-								app.Th().Class("px-6 py-3").Text("Cronjob Readable"),
-								app.Th().Class("px-6 py-3").Text("Next Run"),
+								app.Th().Class("px-6 py-3").Text("JobId"),
+								app.Th().Class("px-6 py-3").Text("Status"),
+								app.Th().Class("px-6 py-3").Text("ExecuteDatetime"),
+								app.Th().Class("px-6 py-3").Text("config"),
 								app.Th().Class("px-6 py-3").Text("Action"),
 							),
 						),
 						app.TBody().Class("font-kanit").Body(
 							app.If((len(d.dags) > 0), app.Range(d.dags[dataSTD:dataEND]).Slice(func(i int) app.UI {
-								dag := d.dags[dataSTD:dataEND][i]
-								cronReadable, _ := constants.CRONJOB_READABLE(dag.CronjobExpression)
-								var expression = dag.CronjobExpression
-								if expression == "" {
-									expression = "-"
-								}
-								return app.Tr().Class("border-b").Body(
-									app.Td().Class("px-6 py-3 text-wrap").Text(dag.Name),
-									app.Td().Class("px-6 py-3 text-wrap").Text(expression),
-									app.Td().Class("px-6 py-3 text-wrap").Text(cronReadable),
-									app.Td().Class("px-6 py-3 text-wrap").Text(dag.NextRun.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
-									app.Td().Class("px-6 py-3 text-wrap").Body(
-										app.Div().Class("w-6 hover:cursor-pointer").
-											Attr("dag-id", dag.Name).
-											OnClick(d.onClickRunDag).
-											Body(
-												app.Img().Class("w-full").Src(iconPlay),
-											),
-									),
-								)
+								// dag := d.dags[dataSTD:dataEND][i]
+								// cronReadable, _ := constants.CRONJOB_READABLE(dag.CronjobExpression)
+								// var expression = dag.CronjobExpression
+								// if expression == "" {
+								// 	expression = "-"
+								// }
+								// return app.Tr().Class("border-b").Body(
+								// 	app.Td().Class("px-6 py-3 text-wrap").Text(dag.Name),
+								// 	app.Td().Class("px-6 py-3 text-wrap").Text(expression),
+								// 	app.Td().Class("px-6 py-3 text-wrap").Text(cronReadable),
+								// 	app.Td().Class("px-6 py-3 text-wrap").Text(dag.NextRun.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
+								// 	app.Td().Class("px-6 py-3 text-wrap").Body(
+								// 		app.Div().Class("w-6 hover:cursor-pointer").
+								// 			Attr("dag-id", dag.Name).
+								// 			OnClick(d.onClickRunDag).
+								// 			Body(
+								// 				app.Img().Class("w-full").Src(iconPlay),
+								// 			),
+								// 	),
+								// )
+								return app.Div()
 							})),
 						),
 					),
