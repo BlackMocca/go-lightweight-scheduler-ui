@@ -84,6 +84,7 @@ func (d *JobDetail) fillData(ctx context.Context) {
 			}
 		}
 	}
+	d.Update()
 }
 
 func (d *JobDetail) OnNav(ctx app.Context) {
