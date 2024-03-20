@@ -3,14 +3,21 @@ package pages
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/components"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
+	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/spf13/cast"
+)
+
+const (
+	iconSeeMore = string(constants.ICON_VIEW)
 )
 
 type Job struct {
@@ -21,34 +28,41 @@ type Job struct {
 	/* value */
 	intervalCtx    context.Context
 	intervalCancel context.CancelFunc
-	dags           []*models.JobList
+	jobs           []*models.Job
 	paginator      models.Paginator
 	err            error
 }
 
 func (d *Job) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
-	d.paginator = models.NewDefaultPaginator(10)
+	d.paginator = models.NewDefaultPaginator(5)
 	d.modalDagrun = components.ModalDagrun{}
 }
 
-func (d *Job) fillDag(context.Context) {
-	// dags, err := api.SchedulerAPI.FetchListDag(nil)
-	// if err != nil {
-	// 	app.Log(err)
-	// 	d.err = err
-	// 	return
-	// }
-	// d.dags = dags
+func (d *Job) fillJob(context.Context) {
+	queryparams := url.Values{}
+	queryparams.Add("page", cast.ToString(d.paginator.Page))
+	queryparams.Add("per_page", cast.ToString(d.paginator.PerPage))
 
-	// if len(dags) > 0 {
-	// 	d.paginator.SetFromTotalRows(int64(len(dags)))
-	// }
+	jobs, paginator, err := api.SchedulerAPI.FetchListJob(queryparams)
+	if err != nil {
+		app.Log(err)
+		d.err = err
+		return
+	}
+	d.jobs = jobs
+
+	if paginator != nil {
+		d.paginator.TotalPage = paginator.TotalPage
+		d.paginator.TotalRows = paginator.TotalRows
+	}
+
+	d.Update()
 }
 
 func (d *Job) OnNav(ctx app.Context) {
 	core.SetSchedulerAPIIfSession(ctx)
-	d.fillDag(d.intervalCtx)
+	d.fillJob(d.intervalCtx)
 	// dag := &models.Dag{
 	// 	Name: "tmp",
 	// }
@@ -74,21 +88,33 @@ func (d *Job) intervalFetchDataDag(millisec int) {
 		default:
 			time.Sleep(time.Duration(millisec/1000) * time.Second)
 			/* fetch dag */
-			d.fillDag(d.intervalCtx)
+			d.fillJob(d.intervalCtx)
 		}
 	}
 }
 
 func (d *Job) onClickRunDag(ctx app.Context, e app.Event) {
 	var dagId = ctx.JSSrc().Call("getAttribute", "dag-id").String()
-	d.Base.modalDagrun.Visible(dagId, "")
+	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
+	var triggerConfigStr = d.jobs[jobIndex].Trigger.ConfigString()
+	if triggerConfigStr == "{}" {
+		triggerConfigStr = ""
+	}
+	d.Base.modalDagrun.Visible(dagId, triggerConfigStr)
+}
+
+func (d *Job) onClickSeemore(ctx app.Context, e app.Event) {
+	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
+	var path = fmt.Sprintf("/console/job/detail?job_id=%s", d.jobs[jobIndex].JobID)
+
+	app.Window().Call("openInNewTab", path)
 }
 
 func (d *Job) Render() app.UI {
 	dataSTD, dataEND := d.paginator.GetRangeData()
 	return d.Base.Content(components.PAGE_JOB_INDEX,
 		app.Div().Class("w-full h-full").Body(
-			components.NewNavHeader(components.NavHeaderProp{Title: "Dag"}),
+			components.NewNavHeader(components.NavHeaderProp{Title: "Job"}),
 			app.Div().Class("flex flex-col p-8 w-full").Body(
 				app.Div().Class(core.Hidden((d.err == nil), "flex w-full h-12 p-2 mb-6 bg-red-200 items-center")).Body(
 					app.H1().Class("text-red-500 just").Text(fmt.Sprintf("ERROR: %s", strings.ToUpper(core.Error(d.err)))),
@@ -99,37 +125,45 @@ func (d *Job) Render() app.UI {
 					app.Table().Class("table-auto w-full").Body(
 						app.THead().Class("font-kanitBold border bg-slate-300 bg-opacity-50").Body(
 							app.Tr().Class().Body(
-								app.Th().Class("px-6 py-3").Text("Name"),
-								app.Th().Class("px-6 py-3").Text("JobId"),
-								app.Th().Class("px-6 py-3").Text("Status"),
-								app.Th().Class("px-6 py-3").Text("ExecuteDatetime"),
-								app.Th().Class("px-6 py-3").Text("config"),
-								app.Th().Class("px-6 py-3").Text("Action"),
+								app.Th().Class("px-4 py-3").Text("JobId"),
+								app.Th().Class("px-4 py-3").Text("DagName"),
+								app.Th().Class("px-4 py-3").Text("Status"),
+								app.Th().Class("px-4 py-3").Text("ExecuteDatetime"),
+								app.Th().Class("px-4 py-3").Text("config"),
+								app.Th().Class("px-4 py-3").Text("Action"),
 							),
 						),
 						app.TBody().Class("font-kanit").Body(
-							app.If((len(d.dags) > 0), app.Range(d.dags[dataSTD:dataEND]).Slice(func(i int) app.UI {
-								// dag := d.dags[dataSTD:dataEND][i]
-								// cronReadable, _ := constants.CRONJOB_READABLE(dag.CronjobExpression)
-								// var expression = dag.CronjobExpression
-								// if expression == "" {
-								// 	expression = "-"
-								// }
-								// return app.Tr().Class("border-b").Body(
-								// 	app.Td().Class("px-6 py-3 text-wrap").Text(dag.Name),
-								// 	app.Td().Class("px-6 py-3 text-wrap").Text(expression),
-								// 	app.Td().Class("px-6 py-3 text-wrap").Text(cronReadable),
-								// 	app.Td().Class("px-6 py-3 text-wrap").Text(dag.NextRun.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
-								// 	app.Td().Class("px-6 py-3 text-wrap").Body(
-								// 		app.Div().Class("w-6 hover:cursor-pointer").
-								// 			Attr("dag-id", dag.Name).
-								// 			OnClick(d.onClickRunDag).
-								// 			Body(
-								// 				app.Img().Class("w-full").Src(iconPlay),
-								// 			),
-								// 	),
-								// )
-								return app.Div()
+							app.If((len(d.jobs) > 0), app.Range(d.jobs).Slice(func(i int) app.UI {
+								ptr := d.jobs[i]
+								return app.Tr().Class("border-b").Body(
+									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.JobID),
+									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.SchedulerName),
+									app.Td().Class("flex flex-rows px-4 py-3 text-wrap gap-2 text-start items-center justify-start").Body(
+										app.Div().Class(fmt.Sprintf("w-4 h-4 my-auto %s", statusBgColor[ptr.Status])),
+										app.P().Class("").Text(strings.ToUpper(ptr.Status)),
+									),
+									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.Trigger.ExecuteDatetime.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
+									app.Td().Class("px-4 py-3 text-wrap").Body(
+										app.P().Class("w-24 truncate").Text(ptr.Trigger.ConfigString()),
+									),
+									app.Td().Class("flex flex-rows gap-3 px-4 py-3 text-wrap").Body(
+										app.Div().Class("w-6 hover:cursor-pointer").
+											Attr("dag-id", ptr.SchedulerName).
+											Attr("index", i).
+											OnClick(d.onClickSeemore).
+											Body(
+												app.Img().Class("w-full").Src(iconSeeMore),
+											),
+										app.Div().Class("w-6 hover:cursor-pointer").
+											Attr("dag-id", ptr.SchedulerName).
+											Attr("index", i).
+											OnClick(d.onClickRunDag).
+											Body(
+												app.Img().Class("w-full").Src(iconPlay),
+											),
+									),
+								)
 							})),
 						),
 					),
@@ -144,9 +178,10 @@ func (d *Job) Render() app.UI {
 								).OnClick(func(ctx app.Context, e app.Event) {
 								if d.paginator.Page > 1 {
 									d.paginator.Page--
+									d.fillJob(ctx)
 								}
 							}),
-							app.If((len(d.dags) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
+							app.If((len(d.jobs) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
 								var selectedStyle = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base"
 								var style = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer"
 								var page = d.paginator.GetNavPagination(d.paginator.Page)[i]
@@ -158,12 +193,14 @@ func (d *Job) Render() app.UI {
 									app.P().Text(page),
 								).OnClick(func(ctx app.Context, e app.Event) {
 									d.paginator.Page = int(page)
+									d.fillJob(ctx)
 								})
 							})),
 							app.Div().Class("relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer").
 								OnClick(func(ctx app.Context, e app.Event) {
 									if d.paginator.Page < int(d.paginator.TotalPage) {
 										d.paginator.Page++
+										d.fillJob(ctx)
 									}
 								}).
 								Body(

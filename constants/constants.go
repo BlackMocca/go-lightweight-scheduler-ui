@@ -29,6 +29,7 @@ const (
 	ICON_CLOSE                  AssetPath = "/web/resources/assets/icon/close.svg"
 	ICON_DATA_NOT_FOUND         AssetPath = "/web/resources/assets/icon/data_not_found.svg"
 	ICON_BOTTOM_ARROW           AssetPath = "/web/resources/assets/icon/bottom_arrow.svg"
+	ICON_VIEW                   AssetPath = "/web/resources/assets/icon/view.svg"
 )
 
 const (

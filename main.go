@@ -62,6 +62,7 @@ func main() {
 	// Components routing:
 	app.Route("/", &pages.App{})
 	app.Route("/console/dag", &pageV1.Dag{Base: pageV1.Base{}})
+	app.Route("/console/job", &pageV1.Job{Base: pageV1.Base{}})
 	app.Route("/console/setting", &pageV1.Setting{Base: pageV1.Base{}})
 	app.Route("/console/job/detail", &pageV1.JobDetail{Base: pageV1.Base{}})
 	app.RunWhenOnBrowser()

@@ -87,6 +87,35 @@ func (s *schedulerAPI) FetchListDag(querparams url.Values) ([]*models.Dag, error
 	return ptrs, nil
 }
 
+func (s *schedulerAPI) FetchListJob(querparams url.Values) ([]*models.Job, *models.Paginator, error) {
+	var paginator = &models.Paginator{}
+	resp, err := s.execute(echo.GET, "/v1/jobs", querparams, nil)
+	if err != nil {
+		return nil, paginator, err
+	}
+	statusCode, body, err := extractResponse(resp, "jobs")
+	if err != nil {
+		return nil, paginator, err
+	}
+	var ptrs = make([]*models.Job, 0)
+
+	respBody, err := toBodyMap(resp)
+	if err != nil {
+		return nil, paginator, err
+	}
+	if statusCode == http.StatusOK {
+		if err := json.Unmarshal(body, &ptrs); err != nil {
+			return nil, paginator, err
+		}
+		paginator.Page = cast.ToInt(respBody["page"])
+		paginator.PerPage = cast.ToInt(respBody["per_page"])
+		paginator.TotalPage = cast.ToInt64(respBody["total_page"])
+		paginator.TotalRows = cast.ToInt64(respBody["total_row"])
+	}
+
+	return ptrs, paginator, nil
+}
+
 func (s *schedulerAPI) FetchJobDetail(jobId *uuid.UUID) (*models.Job, error) {
 	resp, err := s.execute(echo.GET, fmt.Sprintf("/v1/job/%s", jobId.String()), nil, nil)
 	if err != nil {

@@ -53,3 +53,11 @@ func extractResponse(resp *resty.Response, bodyKey string) (statusCode int, body
 	}
 	return
 }
+
+func toBodyMap(resp *resty.Response) (map[string]interface{}, error) {
+	var m = make(map[string]interface{})
+	if err := json.Unmarshal(resp.Body(), &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
