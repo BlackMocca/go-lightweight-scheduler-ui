@@ -31,12 +31,18 @@ type Job struct {
 	jobs           []*models.Job
 	paginator      models.Paginator
 	err            error
+
+	searchForm components.SearchForm
+}
+
+func (j *Job) Event(ctx app.Context, event constants.Event, data interface{}) {
 }
 
 func (d *Job) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 	d.paginator = models.NewDefaultPaginator(5)
 	d.modalDagrun = components.ModalDagrun{}
+	d.searchForm = components.NewSearchForm(d)
 }
 
 func (d *Job) fillJob(context.Context) {
@@ -120,6 +126,10 @@ func (d *Job) Render() app.UI {
 					app.H1().Class("text-red-500 just").Text(fmt.Sprintf("ERROR: %s", strings.ToUpper(core.Error(d.err)))),
 				),
 
+				/* search input */
+				app.Div().Class("w-full").Body(
+					&d.searchForm,
+				),
 				/* data table */
 				app.Div().Class("w-full overflow-x-auto text-left shadow-md sm:rounded-lg rounded").Body(
 					app.Table().Class("table-auto w-full").Body(
