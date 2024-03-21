@@ -40,7 +40,7 @@ func (j *Job) Event(ctx app.Context, event constants.Event, data interface{}) {
 
 func (d *Job) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
-	d.paginator = models.NewDefaultPaginator(5)
+	d.paginator = models.NewDefaultPaginator(8)
 	d.modalDagrun = components.ModalDagrun{}
 	d.searchForm = components.NewSearchForm(d, d.onSearch)
 }
