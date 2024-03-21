@@ -119,6 +119,38 @@ func (s *schedulerAPI) FetchListJob(querparams url.Values) ([]*models.Job, *mode
 	return ptrs, paginator, nil
 }
 
+func (s *schedulerAPI) FetchListFutureJob(querparams url.Values) ([]*models.Trigger, *models.Paginator, error) {
+	var paginator = &models.Paginator{Page: cast.ToInt(querparams.Get("page")), PerPage: cast.ToInt(querparams.Get("per_page"))}
+	var ptrs = make([]*models.Trigger, 0)
+	resp, err := s.execute(echo.GET, "/v1/job/futures", querparams, nil)
+	if err != nil {
+		return nil, paginator, err
+	}
+	statusCode, body, err := extractResponse(resp, "triggers")
+	if err != nil {
+		return nil, paginator, err
+	}
+	if statusCode == http.StatusNoContent {
+		return ptrs, paginator, nil
+	}
+
+	respBody, err := toBodyMap(resp)
+	if err != nil {
+		return nil, paginator, err
+	}
+	if statusCode == http.StatusOK {
+		if err := json.Unmarshal(body, &ptrs); err != nil {
+			return nil, paginator, err
+		}
+		paginator.Page = cast.ToInt(respBody["page"])
+		paginator.PerPage = cast.ToInt(respBody["per_page"])
+		paginator.TotalPage = cast.ToInt64(respBody["total_page"])
+		paginator.TotalRows = cast.ToInt64(respBody["total_row"])
+	}
+
+	return ptrs, paginator, nil
+}
+
 func (s *schedulerAPI) FetchListJobTask(querparams url.Values) ([]*models.JobRunningTask, *models.Paginator, error) {
 	var paginator = &models.Paginator{Page: cast.ToInt(querparams.Get("page")), PerPage: cast.ToInt(querparams.Get("per_page"))}
 	var ptrs = make([]*models.JobRunningTask, 0)

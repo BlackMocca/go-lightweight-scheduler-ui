@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	iconSeeMore = string(constants.ICON_VIEW)
+	iconDelete = string(constants.ICON_DELETE_PRIMARY)
 )
 
-type Job struct {
+type JobFuture struct {
 	app.Compo
 	/* component */
 	Base
@@ -28,17 +28,17 @@ type Job struct {
 	/* value */
 	intervalCtx    context.Context
 	intervalCancel context.CancelFunc
-	jobs           []*models.Job
+	triggers       []*models.Trigger
 	paginator      models.Paginator
 	err            error
 
 	searchForm components.SearchForm
 }
 
-func (j *Job) Event(ctx app.Context, event constants.Event, data interface{}) {
+func (j *JobFuture) Event(ctx app.Context, event constants.Event, data interface{}) {
 }
 
-func (d *Job) OnInit() {
+func (d *JobFuture) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 	d.paginator = models.NewDefaultPaginator(8)
 	d.modalDagrun = components.ModalDagrun{}
@@ -46,17 +46,17 @@ func (d *Job) OnInit() {
 		SearchInputLabel:    "Searching JobId or DagName",
 		SearchInputDisabled: false,
 		StatusLabel:         "Job Status",
-		StatusDisabled:      false,
+		StatusDisabled:      true,
 		DateLabel:           "Execution Date",
 		DateDisabled:        false,
 	})
 }
 
-func (d *Job) onSearch() {
+func (d *JobFuture) onSearch() {
 	d.fillJob(d.intervalCtx)
 }
 
-func (d *Job) fillJob(context.Context) {
+func (d *JobFuture) fillJob(context.Context) {
 	searchVal := d.searchForm.SearchInput().GetValue()
 	statusVal := d.searchForm.StatusDropDownInput().GetValueDisplay()
 	startDateVal := d.searchForm.StartDateInput().GetValue()
@@ -74,13 +74,13 @@ func (d *Job) fillJob(context.Context) {
 	queryparams.Add("end_date", endDateVal)
 	queryparams.Add("status", statusVal)
 
-	jobs, paginator, err := api.SchedulerAPI.FetchListJob(queryparams)
+	triggers, paginator, err := api.SchedulerAPI.FetchListFutureJob(queryparams)
 	if err != nil {
 		app.Log(err)
 		d.err = err
 		return
 	}
-	d.jobs = jobs
+	d.triggers = triggers
 
 	if paginator != nil {
 		d.paginator.TotalPage = paginator.TotalPage
@@ -90,7 +90,7 @@ func (d *Job) fillJob(context.Context) {
 	d.Update()
 }
 
-func (d *Job) OnNav(ctx app.Context) {
+func (d *JobFuture) OnNav(ctx app.Context) {
 	core.SetSchedulerAPIIfSession(ctx)
 	d.fillJob(d.intervalCtx)
 	// dag := &models.Dag{
@@ -106,11 +106,11 @@ func (d *Job) OnNav(ctx app.Context) {
 	go d.intervalFetchDataDag(cast.ToInt(interval))
 }
 
-func (d *Job) OnDismount() {
+func (d *JobFuture) OnDismount() {
 	d.intervalCancel()
 }
 
-func (d *Job) intervalFetchDataDag(millisec int) {
+func (d *JobFuture) intervalFetchDataDag(millisec int) {
 	for {
 		select {
 		case <-d.intervalCtx.Done():
@@ -123,26 +123,16 @@ func (d *Job) intervalFetchDataDag(millisec int) {
 	}
 }
 
-func (d *Job) onClickRunDag(ctx app.Context, e app.Event) {
-	var dagId = ctx.JSSrc().Call("getAttribute", "dag-id").String()
+func (d *JobFuture) onClickSeemore(ctx app.Context, e app.Event) {
 	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
-	var triggerConfigStr = d.jobs[jobIndex].Trigger.ConfigString()
-	if triggerConfigStr == "{}" {
-		triggerConfigStr = ""
-	}
-	d.Base.modalDagrun.Visible(dagId, triggerConfigStr)
-}
-
-func (d *Job) onClickSeemore(ctx app.Context, e app.Event) {
-	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
-	var path = fmt.Sprintf("/console/job/detail?job_id=%s", d.jobs[jobIndex].JobID)
+	var path = fmt.Sprintf("/console/job/detail?job_id=%s", d.triggers[jobIndex].JobID)
 
 	app.Window().Call("openInNewTab", path)
 }
 
-func (d *Job) Render() app.UI {
+func (d *JobFuture) Render() app.UI {
 	dataSTD, dataEND := d.paginator.GetRangeData()
-	return d.Base.Content(components.PAGE_JOB_INDEX,
+	return d.Base.Content(components.PAGE_FUTURE_INDEX,
 		app.Div().Class("w-full h-full").Body(
 			components.NewNavHeader(components.NavHeaderProp{Title: "Job"}),
 			app.Div().Class("flex flex-col p-8 w-full").Body(
@@ -159,31 +149,26 @@ func (d *Job) Render() app.UI {
 					app.Table().Class("table-auto w-full").Body(
 						app.THead().Class("font-kanitBold border bg-slate-300 bg-opacity-50").Body(
 							app.Tr().Class().Body(
-								app.Th().Class("px-4 py-3").Text("JobId"),
-								app.Th().Class("px-4 py-3").Text("DagName"),
-								app.Th().Class("px-4 py-3").Text("Status"),
-								app.Th().Class("px-4 py-3").Text("ExecuteDatetime"),
-								app.Th().Class("px-4 py-3").Text("config"),
-								app.Th().Class("px-4 py-3").Text("Action"),
+								app.Th().Class("px-2 py-3 w-80").Text("JobId"),
+								app.Th().Class("px-2 py-3").Text("DagName"),
+								app.Th().Class("px-2 py-3").Text("ExecuteDatetime"),
+								app.Th().Class("px-2 py-3").Text("config"),
+								app.Th().Class("px-2 py-3").Text("Action"),
 							),
 						),
 						app.TBody().Class("font-kanit").Body(
-							app.If((len(d.jobs) > 0), app.Range(d.jobs).Slice(func(i int) app.UI {
-								ptr := d.jobs[i]
+							app.If((len(d.triggers) > 0), app.Range(d.triggers).Slice(func(i int) app.UI {
+								ptr := d.triggers[i]
 								return app.Tr().Class("border-b").Body(
-									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.JobID),
-									app.Td().Class("px-4 py-3").Body(
+									app.Td().Class("px-2 py-3 w-96").Text(ptr.JobID),
+									app.Td().Class("px-2 py-3").Body(
 										app.P().Class("truncate").Text(ptr.SchedulerName),
 									),
-									app.Td().Class("flex flex-rows px-4 py-3 text-wrap gap-2 text-start items-center justify-start").Body(
-										app.Div().Class(fmt.Sprintf("w-4 h-4 my-auto %s", statusBgColor[ptr.Status])),
-										app.P().Class("").Text(strings.ToUpper(ptr.Status)),
+									app.Td().Class("px-2 py-3 text-wrap").Text(ptr.ExecuteDatetime.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
+									app.Td().Class("px-2 py-3 text-wrap").Body(
+										app.P().Class("w-24 truncate").Text(ptr.ConfigString()),
 									),
-									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.Trigger.ExecuteDatetime.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
-									app.Td().Class("px-4 py-3 text-wrap").Body(
-										app.P().Class("w-24 truncate").Text(ptr.Trigger.ConfigString()),
-									),
-									app.Td().Class("flex flex-rows gap-3 px-4 py-3 text-wrap").Body(
+									app.Td().Class("flex flex-rows gap-3 px-2 py-3 text-wrap").Body(
 										app.Div().Class("w-6 hover:cursor-pointer").
 											Attr("dag-id", ptr.SchedulerName).
 											Attr("index", i).
@@ -194,9 +179,9 @@ func (d *Job) Render() app.UI {
 										app.Div().Class("w-6 hover:cursor-pointer").
 											Attr("dag-id", ptr.SchedulerName).
 											Attr("index", i).
-											OnClick(d.onClickRunDag).
+											// OnClick(d.onClickSeemore).
 											Body(
-												app.Img().Class("w-full").Src(iconPlay),
+												app.Img().Class("w-full").Src(iconDelete),
 											),
 									),
 								)
@@ -217,7 +202,7 @@ func (d *Job) Render() app.UI {
 									d.fillJob(ctx)
 								}
 							}),
-							app.If((len(d.jobs) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
+							app.If((len(d.triggers) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
 								var selectedStyle = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base"
 								var style = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer"
 								var page = d.paginator.GetNavPagination(d.paginator.Page)[i]
