@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/pages"
+	pageV1 "github.com/Blackmocca/go-lightweight-scheduler-ui/pages/v1"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
@@ -31,13 +32,26 @@ const (
 
 var (
 	App = &app.Handler{
-		Name:        "Hello",
-		Description: "An Hello World! example",
-		Styles: []string{
-			"/web/styles/pure-css/pure-min.css",
+		Name:        "Godflow",
+		Title:       "Godflow",
+		Description: "Make to Easy ETL",
+		Icon: app.Icon{
+			Default: "/web/resources/assets/logo/logo-no-background.png",
+			SVG:     "/web/resources/assets/logo/logo-no-background.svg",
 		},
-		CacheableResources: []string{
-			"/web/styles/pure-css/pure-min.css",
+		LoadingLabel: "Loading {progress}%",
+		Styles: []string{
+			"/web/resources/styles/tailwind/tailwind-min.css",
+			"/web/resources/styles/loading.css",
+		},
+		Scripts: []string{
+			"/web/resources/javascripts/event.js",
+		},
+		CacheableResources: []string{},
+		Fonts: []string{
+			"/web/resources/fonts/Kanit-Regular.ttf",
+			"/web/resources/fonts/Kanit-Light.ttf",
+			"/web/resources/fonts/Kanit-Bold.ttf",
 		},
 		// AutoUpdateInterval: time.Duration(30 * time.Second),
 	}
@@ -46,7 +60,13 @@ var (
 func main() {
 	ctx := context.Background()
 	// Components routing:
-	app.Route("/", &pages.Home{})
+	app.Route("/", &pages.App{})
+	app.Route("/console/dag", &pageV1.Dag{Base: pageV1.Base{}})
+	app.Route("/console/job", &pageV1.Job{Base: pageV1.Base{}})
+	app.Route("/console/task", &pageV1.Task{Base: pageV1.Base{}})
+	app.Route("/console/future", &pageV1.JobFuture{Base: pageV1.Base{}})
+	app.Route("/console/setting", &pageV1.Setting{Base: pageV1.Base{}})
+	app.Route("/console/job/detail", &pageV1.JobDetail{Base: pageV1.Base{}})
 	app.RunWhenOnBrowser()
 
 	// HTTP routing:
