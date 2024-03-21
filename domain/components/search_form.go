@@ -27,10 +27,19 @@ const (
 	tagEndDateInput        = "EndDateInput"
 )
 
+type SearchFromProp struct {
+	SearchInputLabel    string
+	SearchInputDisabled bool
+	StatusLabel         string
+	StatusDisabled      bool
+	DateLabel           string
+	DateDisabled        bool
+}
+
 type SearchForm struct {
 	app.Compo
 	Parent core.ParentNotify
-
+	Prop   SearchFromProp
 	/* search element */
 	searchInput         *elements.InputText
 	statusDropDownInput *elements.Dropdown
@@ -41,8 +50,8 @@ type SearchForm struct {
 	callbackFn func()
 }
 
-func NewSearchForm(parent core.ParentNotify, callbackFn func()) SearchForm {
-	return SearchForm{Parent: parent, callbackFn: callbackFn}
+func NewSearchForm(parent core.ParentNotify, callbackFn func(), Prop SearchFromProp) SearchForm {
+	return SearchForm{Parent: parent, callbackFn: callbackFn, Prop: Prop}
 }
 
 func (f *SearchForm) SearchInput() *elements.InputText {
@@ -159,19 +168,21 @@ func (s SearchForm) Render() app.UI {
 	return app.Div().Class("flex flex-rows justify-between w-full").Body(
 		app.Div().Class("flex flex-rows gap-2 items-center").Body(
 			app.Div().Class("flex flex-col gap-2 w-80").Body(
-				app.P().Class("font-bold").Text("Searching JobId or DagName"),
+				app.P().Class("font-bold").Text(s.Prop.SearchInputLabel),
 				s.searchInput,
 			),
 		),
 		app.Div().Class("flex flex-rows gap-4").Body(
-			app.Div().Class("flex flex-col gap-2").Body(
-				app.P().Class("font-bold").Text("Job Status"),
-				app.Div().Class("w-28 min-w-[28px]").Body(
-					s.statusDropDownInput,
+			app.If(!s.Prop.StatusDisabled,
+				app.Div().Class("flex flex-col gap-2").Body(
+					app.P().Class("font-bold").Text(s.Prop.StatusLabel),
+					app.Div().Class("w-28 min-w-[28px]").Body(
+						s.statusDropDownInput,
+					),
 				),
 			),
 			app.Div().Class("flex flex-col gap-2").Body(
-				app.P().Class("font-bold").Text("Execution Date"),
+				app.P().Class("font-bold").Text(s.Prop.DateLabel),
 				app.Div().Class("flex flex-rows gap-2 items-center").Body(
 					s.startDateInput,
 					app.P().Class().Text("-"),

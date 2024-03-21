@@ -22,8 +22,9 @@ const (
 	PAGE_NONE_INDEX    = -1
 	PAGE_DAG_INDEX     = 0
 	PAGE_JOB_INDEX     = 1
-	PAGE_HISTORY_INDEX = 2
+	PAGE_TASK_INDEX    = 2
 	PAGE_SETTING_INDEX = 3
+	PAGE_FUTURE_INDEX  = 4
 )
 
 type navigate struct {
@@ -103,7 +104,8 @@ func (n *Nav) Render() app.UI {
 		navigates = append(navigates,
 			navigate{display: "Dag", path: "/console/dag", pageIndex: PAGE_DAG_INDEX},
 			navigate{display: "Job", path: "/console/job", pageIndex: PAGE_JOB_INDEX},
-			navigate{display: "History", path: "/console/history", pageIndex: PAGE_HISTORY_INDEX},
+			navigate{display: "Task", path: "/console/task", pageIndex: PAGE_TASK_INDEX},
+			navigate{display: "Future Job", path: "/console/future", pageIndex: PAGE_FUTURE_INDEX},
 		)
 	}
 	var settingStyle = "flex flex-row w-full text-xl p-4 gap-x-2 text-secondary-base items-center justify-start hover:cursor-pointer hover:bg-secondary-base hover:bg-opacity-25"

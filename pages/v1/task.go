@@ -16,11 +16,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-const (
-	iconSeeMore = string(constants.ICON_VIEW)
-)
-
-type Job struct {
+type Task struct {
 	app.Compo
 	/* component */
 	Base
@@ -28,35 +24,35 @@ type Job struct {
 	/* value */
 	intervalCtx    context.Context
 	intervalCancel context.CancelFunc
-	jobs           []*models.Job
+	tasks          []*models.JobRunningTask
 	paginator      models.Paginator
 	err            error
 
 	searchForm components.SearchForm
 }
 
-func (j *Job) Event(ctx app.Context, event constants.Event, data interface{}) {
+func (j *Task) Event(ctx app.Context, event constants.Event, data interface{}) {
 }
 
-func (d *Job) OnInit() {
+func (d *Task) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 	d.paginator = models.NewDefaultPaginator(8)
 	d.modalDagrun = components.ModalDagrun{}
 	d.searchForm = components.NewSearchForm(d, d.onSearch, components.SearchFromProp{
-		SearchInputLabel:    "Searching JobId or DagName",
+		SearchInputLabel:    "Searching TaskId or TaskName",
 		SearchInputDisabled: false,
-		StatusLabel:         "Job Status",
+		StatusLabel:         "Task Status",
 		StatusDisabled:      false,
-		DateLabel:           "Execution Date",
+		DateLabel:           "Start Date",
 		DateDisabled:        false,
 	})
 }
 
-func (d *Job) onSearch() {
-	d.fillJob(d.intervalCtx)
+func (d *Task) onSearch() {
+	d.fillTask(d.intervalCtx)
 }
 
-func (d *Job) fillJob(context.Context) {
+func (d *Task) fillTask(context.Context) {
 	searchVal := d.searchForm.SearchInput().GetValue()
 	statusVal := d.searchForm.StatusDropDownInput().GetValueDisplay()
 	startDateVal := d.searchForm.StartDateInput().GetValue()
@@ -74,13 +70,13 @@ func (d *Job) fillJob(context.Context) {
 	queryparams.Add("end_date", endDateVal)
 	queryparams.Add("status", statusVal)
 
-	jobs, paginator, err := api.SchedulerAPI.FetchListJob(queryparams)
+	tasks, paginator, err := api.SchedulerAPI.FetchListJobTask(queryparams)
 	if err != nil {
 		app.Log(err)
 		d.err = err
 		return
 	}
-	d.jobs = jobs
+	d.tasks = tasks
 
 	if paginator != nil {
 		d.paginator.TotalPage = paginator.TotalPage
@@ -90,9 +86,9 @@ func (d *Job) fillJob(context.Context) {
 	d.Update()
 }
 
-func (d *Job) OnNav(ctx app.Context) {
+func (d *Task) OnNav(ctx app.Context) {
 	core.SetSchedulerAPIIfSession(ctx)
-	d.fillJob(d.intervalCtx)
+	d.fillTask(d.intervalCtx)
 	// dag := &models.Dag{
 	// 	Name: "tmp",
 	// }
@@ -106,11 +102,11 @@ func (d *Job) OnNav(ctx app.Context) {
 	go d.intervalFetchDataDag(cast.ToInt(interval))
 }
 
-func (d *Job) OnDismount() {
+func (d *Task) OnDismount() {
 	d.intervalCancel()
 }
 
-func (d *Job) intervalFetchDataDag(millisec int) {
+func (d *Task) intervalFetchDataDag(millisec int) {
 	for {
 		select {
 		case <-d.intervalCtx.Done():
@@ -118,33 +114,23 @@ func (d *Job) intervalFetchDataDag(millisec int) {
 		default:
 			time.Sleep(time.Duration(millisec/1000) * time.Second)
 			/* fetch dag */
-			d.fillJob(d.intervalCtx)
+			d.fillTask(d.intervalCtx)
 		}
 	}
 }
 
-func (d *Job) onClickRunDag(ctx app.Context, e app.Event) {
-	var dagId = ctx.JSSrc().Call("getAttribute", "dag-id").String()
-	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
-	var triggerConfigStr = d.jobs[jobIndex].Trigger.ConfigString()
-	if triggerConfigStr == "{}" {
-		triggerConfigStr = ""
-	}
-	d.Base.modalDagrun.Visible(dagId, triggerConfigStr)
-}
-
-func (d *Job) onClickSeemore(ctx app.Context, e app.Event) {
-	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
-	var path = fmt.Sprintf("/console/job/detail?job_id=%s", d.jobs[jobIndex].JobID)
+func (d *Task) onClickSeemore(ctx app.Context, e app.Event) {
+	var TaskIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
+	var path = fmt.Sprintf("/console/job/detail?job_id=%s", d.tasks[TaskIndex].JobID)
 
 	app.Window().Call("openInNewTab", path)
 }
 
-func (d *Job) Render() app.UI {
+func (d *Task) Render() app.UI {
 	dataSTD, dataEND := d.paginator.GetRangeData()
-	return d.Base.Content(components.PAGE_JOB_INDEX,
+	return d.Base.Content(components.PAGE_TASK_INDEX,
 		app.Div().Class("w-full h-full").Body(
-			components.NewNavHeader(components.NavHeaderProp{Title: "Job"}),
+			components.NewNavHeader(components.NavHeaderProp{Title: "Task"}),
 			app.Div().Class("flex flex-col p-8 w-full").Body(
 				app.Div().Class(core.Hidden((d.err == nil), "flex w-full h-12 p-2 mb-6 bg-red-200 items-center")).Body(
 					app.H1().Class("text-red-500 just").Text(fmt.Sprintf("ERROR: %s", strings.ToUpper(core.Error(d.err)))),
@@ -156,47 +142,48 @@ func (d *Job) Render() app.UI {
 				),
 				/* data table */
 				app.Div().Class("w-full overflow-x-auto text-left shadow-md sm:rounded-lg rounded").Body(
-					app.Table().Class("table-auto w-full").Body(
+					app.Table().Class("table-fixed w-full").Body(
 						app.THead().Class("font-kanitBold border bg-slate-300 bg-opacity-50").Body(
 							app.Tr().Class().Body(
-								app.Th().Class("px-4 py-3").Text("JobId"),
-								app.Th().Class("px-4 py-3").Text("DagName"),
-								app.Th().Class("px-4 py-3").Text("Status"),
-								app.Th().Class("px-4 py-3").Text("ExecuteDatetime"),
-								app.Th().Class("px-4 py-3").Text("config"),
-								app.Th().Class("px-4 py-3").Text("Action"),
+								app.Th().Class("px-2 py-3").Text("TaskId"),
+								app.Th().Class("px-2 py-3").Text("JobId"),
+								app.Th().Class("px-2 py-3").Text("TaskName"),
+								app.Th().Class("px-2 py-3").Text("Status"),
+								app.Th().Class("px-2 py-3").Text("StartDatetime"),
+								app.Th().Class("px-2 py-3").Text("Exception"),
+								app.Th().Class("px-2 py-3").Text("Action"),
 							),
 						),
 						app.TBody().Class("font-kanit").Body(
-							app.If((len(d.jobs) > 0), app.Range(d.jobs).Slice(func(i int) app.UI {
-								ptr := d.jobs[i]
+							app.If((len(d.tasks) > 0), app.Range(d.tasks).Slice(func(i int) app.UI {
+								ptr := d.tasks[i]
 								return app.Tr().Class("border-b").Body(
-									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.JobID),
-									app.Td().Class("px-4 py-3 text-wrap").Body(
-										app.P().Class("truncate").Text(ptr.SchedulerName),
+									app.Td().Class("px-2 py-3 text-wrap").Body(
+										app.P().Class("truncate").Text(ptr.Id),
 									),
-									app.Td().Class("flex flex-rows px-4 py-3 text-wrap gap-2 text-start items-center justify-start").Body(
+									app.Td().Class("px-2 py-3 text-wrap").Body(
+										app.P().Class("truncate").Text(ptr.JobID),
+									),
+									app.Td().Class("px-2 py-3 text-wrap truncate").Body(
+										app.P().Class("truncate").Text(ptr.Name),
+									),
+									app.Td().Class("flex flex-rows px-2 py-3 text-wrap gap-2 text-start items-center justify-start").Body(
 										app.Div().Class(fmt.Sprintf("w-4 h-4 my-auto %s", statusBgColor[ptr.Status])),
 										app.P().Class("").Text(strings.ToUpper(ptr.Status)),
 									),
-									app.Td().Class("px-4 py-3 text-wrap").Text(ptr.Trigger.ExecuteDatetime.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
-									app.Td().Class("px-4 py-3 text-wrap").Body(
-										app.P().Class("w-24 truncate").Text(ptr.Trigger.ConfigString()),
+									app.Td().Class("px-2 py-3 text-wrap truncate").Body(
+										app.P().Class("truncate").Text(ptr.StartDatetime.ToTime().Format(constants.TIMESTAMP_LAYOUT)),
 									),
-									app.Td().Class("flex flex-rows gap-3 px-4 py-3 text-wrap").Body(
+									app.Td().Class("px-2 py-3 text-wrap").Body(
+										app.P().Class("truncate").Text(ptr.Exception),
+									),
+									app.Td().Class("flex flex-rows gap-3 px-2 py-3 text-wrap").Body(
 										app.Div().Class("w-6 hover:cursor-pointer").
 											Attr("dag-id", ptr.SchedulerName).
 											Attr("index", i).
 											OnClick(d.onClickSeemore).
 											Body(
 												app.Img().Class("w-full").Src(iconSeeMore),
-											),
-										app.Div().Class("w-6 hover:cursor-pointer").
-											Attr("dag-id", ptr.SchedulerName).
-											Attr("index", i).
-											OnClick(d.onClickRunDag).
-											Body(
-												app.Img().Class("w-full").Src(iconPlay),
 											),
 									),
 								)
@@ -214,10 +201,10 @@ func (d *Job) Render() app.UI {
 								).OnClick(func(ctx app.Context, e app.Event) {
 								if d.paginator.Page > 1 {
 									d.paginator.Page--
-									d.fillJob(ctx)
+									d.fillTask(ctx)
 								}
 							}),
-							app.If((len(d.jobs) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
+							app.If((len(d.tasks) > 0), app.Range(d.paginator.GetNavPagination(d.paginator.Page)).Slice(func(i int) app.UI {
 								var selectedStyle = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 focus:outline-offset-0 hover:cursor-pointer bg-primary-base text-secondary-base"
 								var style = "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer"
 								var page = d.paginator.GetNavPagination(d.paginator.Page)[i]
@@ -229,14 +216,14 @@ func (d *Job) Render() app.UI {
 									app.P().Text(page),
 								).OnClick(func(ctx app.Context, e app.Event) {
 									d.paginator.Page = int(page)
-									d.fillJob(ctx)
+									d.fillTask(ctx)
 								})
 							})),
 							app.Div().Class("relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0 hover:cursor-pointer").
 								OnClick(func(ctx app.Context, e app.Event) {
 									if d.paginator.Page < int(d.paginator.TotalPage) {
 										d.paginator.Page++
-										d.fillJob(ctx)
+										d.fillTask(ctx)
 									}
 								}).
 								Body(
