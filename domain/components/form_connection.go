@@ -320,7 +320,9 @@ func (f *FormConnection) Render() app.UI {
 					app.Label().Class("font-kanitBold").For("version").Text("Version"),
 				),
 				app.Div().Class("col-span-2 flex items-center").Body(
-					f.versionInput,
+					app.Div().Body(
+						f.versionInput,
+					),
 				),
 				app.Div().Class("col-span-1 flex items-center").Body(
 					app.Span().

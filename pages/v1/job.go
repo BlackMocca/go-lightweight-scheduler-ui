@@ -127,7 +127,7 @@ func (d *Job) Render() app.UI {
 				),
 
 				/* search input */
-				app.Div().Class("w-full").Body(
+				app.Div().Class("w-full py-4").Body(
 					&d.searchForm,
 				),
 				/* data table */

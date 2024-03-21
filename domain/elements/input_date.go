@@ -1,6 +1,8 @@
 package elements
 
 import (
+	"time"
+
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
@@ -17,7 +19,8 @@ type InputDate struct {
 	Parent core.ParentNotify
 	Tag    string
 	InputDateProp
-
+	Min   time.Time
+	Max   time.Time
 	state inputState
 }
 
@@ -55,8 +58,15 @@ func (i *InputDate) onChangeInput(ctx app.Context, e app.Event) {
 	e.PreventDefault()
 }
 
+func (i *InputDate) getDateString(dt time.Time) string {
+	if dt == (time.Time{}) {
+		return ""
+	}
+	return dt.Format(constants.DATE_LAYOUT)
+}
+
 func (i *InputDate) Render() app.UI {
-	class := "leading-6 border border-gray-300 px-2 py-1 rounded-md focus:border-blue-500 focus:outline-none"
+	class := "leading-6 border border-gray-300 px-2 py-[0.38rem] rounded-md focus:border-blue-500 focus:outline-none"
 	if i.state.isValidateErr {
 		class += " border-red-500 "
 	}
@@ -69,5 +79,7 @@ func (i *InputDate) Render() app.UI {
 		Placeholder(i.PlaceHolder).
 		Required(i.Required).
 		AutoComplete(false).
-		OnChange(i.onChangeInput)
+		OnChange(i.onChangeInput).
+		Min(i.getDateString(i.Min)).
+		Max(i.getDateString(i.Max))
 }

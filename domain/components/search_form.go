@@ -1,6 +1,8 @@
 package components
 
 import (
+	"time"
+
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
@@ -21,8 +23,8 @@ var (
 const (
 	tagSearchInput         = "SearchInput"
 	tagStatusDropDownInput = "StatusDropDownInput"
-	tagStartDateInput      = "startDateInput"
-	tagEndDateInput        = "endDateInput"
+	tagStartDateInput      = "StartDateInput"
+	tagEndDateInput        = "EndDateInput"
 )
 
 type SearchForm struct {
@@ -57,7 +59,7 @@ func (f *SearchForm) OnInit() {
 	f.searchInput = elements.NewInputText(f, tagSearchInput, &elements.InputTextProp{
 		BaseInput: elements.BaseInput{
 			Id:          "search",
-			PlaceHolder: "Searching",
+			PlaceHolder: "Searching...",
 			Required:    false,
 			Disabled:    false,
 		},
@@ -78,7 +80,7 @@ func (f *SearchForm) OnInit() {
 	})
 	f.endDateInput = elements.NewInputDate(f, tagEndDateInput, &elements.InputDateProp{
 		BaseInput: elements.BaseInput{
-			Id:          "startDate",
+			Id:          "endDate",
 			PlaceHolder: "",
 			Required:    false,
 			Disabled:    false,
@@ -101,6 +103,36 @@ func (f *SearchForm) Event(ctx app.Context, event constants.Event, data interfac
 			elem.ValidateError = validation.Validate(elem.DropdownProp.SelectIndex, elem.ValidateFunc...)
 			childElem.Update()
 		}
+
+		if childElem, ok := data.(*elements.InputDate); ok {
+			elem := core.CallMethod(f, childElem.Tag).(*elements.InputDate)
+			elem.Value = elem.GetValue()
+			switch childElem.Tag {
+			case tagStartDateInput:
+				f.endDateInput.Min, _ = time.Parse(constants.DATE_LAYOUT, elem.Value)
+				if f.endDateInput.GetValue() != "" {
+					stdt, _ := time.Parse(constants.DATE_LAYOUT, elem.Value)
+					endt, _ := time.Parse(constants.DATE_LAYOUT, f.endDateInput.GetValue())
+					if endt.Sub(stdt) < 0 {
+						f.endDateInput.SetValue("")
+					}
+				}
+				f.endDateInput.Update()
+			case tagEndDateInput:
+				f.startDateInput.Max, _ = time.Parse(constants.DATE_LAYOUT, elem.Value)
+
+				if f.startDateInput.GetValue() != "" {
+					stdt, _ := time.Parse(constants.DATE_LAYOUT, elem.Value)
+					endt, _ := time.Parse(constants.DATE_LAYOUT, f.endDateInput.GetValue())
+					if stdt.Sub(endt) > 0 {
+						f.startDateInput.SetValue("")
+					}
+				}
+				f.startDateInput.Update()
+			}
+
+			childElem.Update()
+		}
 	case constants.EVENT_ON_SELECT:
 		if childElem, ok := data.(*elements.Dropdown); ok {
 			elem := core.CallMethod(f, childElem.Tag).(*elements.Dropdown)
@@ -113,10 +145,28 @@ func (f *SearchForm) Event(ctx app.Context, event constants.Event, data interfac
 }
 
 func (s SearchForm) Render() app.UI {
-	return app.Div().Class().Body(
-		s.searchInput,
-		s.statusDropDownInput,
-		s.startDateInput,
-		s.endDateInput,
+	return app.Div().Class("flex flex-rows justify-between w-full").Body(
+		app.Div().Class("flex flex-rows gap-2 items-center").Body(
+			app.Div().Class("flex flex-col gap-2 w-80").Body(
+				app.P().Class("font-bold").Text("Searching JobId or DagName"),
+				s.searchInput,
+			),
+		),
+		app.Div().Class("flex flex-rows gap-4").Body(
+			app.Div().Class("flex flex-col gap-2").Body(
+				app.P().Class("font-bold").Text("Job Status"),
+				app.Div().Class("w-24").Body(
+					s.statusDropDownInput,
+				),
+			),
+			app.Div().Class("flex flex-col gap-2").Body(
+				app.P().Class("font-bold").Text("Execution Date"),
+				app.Div().Class("flex flex-rows gap-2 items-center").Body(
+					s.startDateInput,
+					app.P().Class().Text("-"),
+					s.endDateInput,
+				),
+			),
+		),
 	)
 }
