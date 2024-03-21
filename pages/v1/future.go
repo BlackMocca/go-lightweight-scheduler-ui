@@ -12,6 +12,7 @@ import (
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/api"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/models"
+	"github.com/gofrs/uuid"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/spf13/cast"
 )
@@ -130,6 +131,18 @@ func (d *JobFuture) onClickSeemore(ctx app.Context, e app.Event) {
 	app.Window().Call("openInNewTab", path)
 }
 
+func (d *JobFuture) onDelete(ctx app.Context, e app.Event) {
+	var jobIndex = cast.ToInt(ctx.JSSrc().Call("getAttribute", "index").String())
+	var jobId = uuid.FromStringOrNil(d.triggers[jobIndex].JobID)
+
+	if err := api.SchedulerAPI.DeleteJobFuture(&jobId); err != nil {
+		app.Log(err)
+		return
+	}
+
+	d.fillJob(ctx)
+}
+
 func (d *JobFuture) Render() app.UI {
 	dataSTD, dataEND := d.paginator.GetRangeData()
 	return d.Base.Content(components.PAGE_FUTURE_INDEX,
@@ -179,7 +192,7 @@ func (d *JobFuture) Render() app.UI {
 										app.Div().Class("w-6 hover:cursor-pointer").
 											Attr("dag-id", ptr.SchedulerName).
 											Attr("index", i).
-											// OnClick(d.onClickSeemore).
+											OnClick(d.onDelete).
 											Body(
 												app.Img().Class("w-full").Src(iconDelete),
 											),

@@ -204,6 +204,18 @@ func (s *schedulerAPI) FetchJobDetail(jobId *uuid.UUID) (*models.Job, error) {
 	return nil, nil
 }
 
+func (s *schedulerAPI) DeleteJobFuture(jobId *uuid.UUID) error {
+	resp, err := s.execute(echo.DELETE, fmt.Sprintf("/v1/job/futures/%s", jobId.String()), nil, nil)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() >= http.StatusBadRequest {
+		return nil
+	}
+
+	return nil
+}
+
 func (s *schedulerAPI) TriggerDag(dagname string, executeDt time.Time, config map[string]interface{}) (*uuid.UUID, error) {
 	reqbody := map[string]interface{}{
 		"name":             dagname,
