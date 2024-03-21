@@ -24,6 +24,9 @@ const (
 	/* delete data fill data from connection */
 	EVENT_DELETE_DATA_FROM_CONNECTION
 
+	/* sending data into parent */
+	EVENT_GET_DATA
+
 	/* update data something */
 	EVENT_UPDATE
 )

@@ -105,6 +105,11 @@ func (elem *Dropdown) chooseItem(ctx app.Context, e app.Event) {
 	menuIndex := cast.ToInt(ctx.JSSrc().Get("value").String())
 	elem.state.toggleText = elem.DropdownProp.MenuItems[menuIndex].Display()
 	elem.state.value = menuIndex
+
+	if elem.Parent != nil {
+		elem.Parent.Event(nil, constants.EVENT_ON_SELECT, elem)
+	}
+
 	elem.Update()
 }
 

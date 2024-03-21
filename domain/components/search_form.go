@@ -36,10 +36,13 @@ type SearchForm struct {
 	statusDropDownInput *elements.Dropdown
 	startDateInput      *elements.InputDate
 	endDateInput        *elements.InputDate
+
+	/* callbackFn */
+	callbackFn func()
 }
 
-func NewSearchForm(parent core.ParentNotify) SearchForm {
-	return SearchForm{Parent: parent}
+func NewSearchForm(parent core.ParentNotify, callbackFn func()) SearchForm {
+	return SearchForm{Parent: parent, callbackFn: callbackFn}
 }
 
 func (f *SearchForm) SearchInput() *elements.InputText {
@@ -138,10 +141,18 @@ func (f *SearchForm) Event(ctx app.Context, event constants.Event, data interfac
 			elem := core.CallMethod(f, childElem.Tag).(*elements.Dropdown)
 			elem.DropdownProp.SelectIndex = cast.ToInt(childElem.GetValue())
 		}
-	case constants.EVENT_CLEAR_DATA_FROM_CONNECTION:
-		// f.clear()
+	}
+	if f.callbackFn != nil {
+		f.callbackFn()
 	}
 	f.Update()
+}
+
+func (f SearchForm) OnDismount() {
+	f.searchInput.SetValue("")
+	f.statusDropDownInput.SetValue(0)
+	f.startDateInput.SetValue("")
+	f.endDateInput.SetValue("")
 }
 
 func (s SearchForm) Render() app.UI {
@@ -155,7 +166,7 @@ func (s SearchForm) Render() app.UI {
 		app.Div().Class("flex flex-rows gap-4").Body(
 			app.Div().Class("flex flex-col gap-2").Body(
 				app.P().Class("font-bold").Text("Job Status"),
-				app.Div().Class("w-24").Body(
+				app.Div().Class("w-28 min-w-[28px]").Body(
 					s.statusDropDownInput,
 				),
 			),

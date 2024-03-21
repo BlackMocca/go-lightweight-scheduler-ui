@@ -1,6 +1,8 @@
 package elements
 
 import (
+	"strings"
+
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/constants"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core"
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/domain/core/validation"
@@ -49,7 +51,7 @@ func NewInputPassword(parent core.ParentNotify, tag string, prop *InputTextProp)
 			inputType: constants.INPUT_TYPE_PASSWORD,
 		},
 		state: inputState{
-			value: prop.Value,
+			value: strings.TrimSpace(prop.Value),
 		},
 	}
 }
@@ -59,14 +61,14 @@ func (i *InputText) GetValue() string {
 }
 
 func (i *InputText) SetValue(value string) *InputText {
-	i.state.value = value
+	i.state.value = strings.TrimSpace(value)
 	return i
 }
 
 func (i *InputText) onChangeInput(ctx app.Context, e app.Event) {
 	value := ctx.JSSrc().Get("value")
 	validateErr := validation.Validate(value.String(), i.ValidateFunc...)
-	i.state.value = value.String()
+	i.state.value = strings.TrimSpace(value.String())
 	i.state.isValidateErr = (validateErr != nil)
 
 	i.Parent.Event(nil, constants.EVENT_ON_VALIDATE_INPUT, i)

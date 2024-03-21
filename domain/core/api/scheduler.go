@@ -88,7 +88,7 @@ func (s *schedulerAPI) FetchListDag(querparams url.Values) ([]*models.Dag, error
 }
 
 func (s *schedulerAPI) FetchListJob(querparams url.Values) ([]*models.Job, *models.Paginator, error) {
-	var paginator = &models.Paginator{}
+	var paginator = &models.Paginator{Page: cast.ToInt(querparams.Get("page")), PerPage: cast.ToInt(querparams.Get("per_page"))}
 	resp, err := s.execute(echo.GET, "/v1/jobs", querparams, nil)
 	if err != nil {
 		return nil, paginator, err
@@ -98,6 +98,9 @@ func (s *schedulerAPI) FetchListJob(querparams url.Values) ([]*models.Job, *mode
 		return nil, paginator, err
 	}
 	var ptrs = make([]*models.Job, 0)
+	if statusCode == http.StatusNoContent {
+		return ptrs, paginator, nil
+	}
 
 	respBody, err := toBodyMap(resp)
 	if err != nil {

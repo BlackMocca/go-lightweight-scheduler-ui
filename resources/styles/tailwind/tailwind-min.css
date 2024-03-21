@@ -706,6 +706,10 @@ video {
   width: 6rem;
 }
 
+.w-28 {
+  width: 7rem;
+}
+
 .w-3\/12 {
   width: 25%;
 }
@@ -748,6 +752,10 @@ video {
 
 .w-screen {
   width: 100vw;
+}
+
+.min-w-\[28px\] {
+  min-width: 28px;
 }
 
 .max-w-full {

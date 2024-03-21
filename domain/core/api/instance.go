@@ -41,6 +41,9 @@ func _getError(resp *resty.Response) (statusCode int, err error) {
 }
 
 func extractResponse(resp *resty.Response, bodyKey string) (statusCode int, body []byte, err error) {
+	if statusCode == http.StatusNoContent {
+		return statusCode, nil, nil
+	}
 	statusCode, err = _getError(resp)
 	if err != nil {
 		return statusCode, nil, err

@@ -42,13 +42,30 @@ func (d *Job) OnInit() {
 	d.intervalCtx, d.intervalCancel = context.WithCancel(context.Background())
 	d.paginator = models.NewDefaultPaginator(5)
 	d.modalDagrun = components.ModalDagrun{}
-	d.searchForm = components.NewSearchForm(d)
+	d.searchForm = components.NewSearchForm(d, d.onSearch)
+}
+
+func (d *Job) onSearch() {
+	d.fillJob(d.intervalCtx)
 }
 
 func (d *Job) fillJob(context.Context) {
+	searchVal := d.searchForm.SearchInput().GetValue()
+	statusVal := d.searchForm.StatusDropDownInput().GetValueDisplay()
+	startDateVal := d.searchForm.StartDateInput().GetValue()
+	endDateVal := d.searchForm.EndDateInput().GetValue()
+
+	if statusVal == "All" {
+		statusVal = ""
+	}
+
 	queryparams := url.Values{}
 	queryparams.Add("page", cast.ToString(d.paginator.Page))
 	queryparams.Add("per_page", cast.ToString(d.paginator.PerPage))
+	queryparams.Add("search_word", searchVal)
+	queryparams.Add("start_date", startDateVal)
+	queryparams.Add("end_date", endDateVal)
+	queryparams.Add("status", statusVal)
 
 	jobs, paginator, err := api.SchedulerAPI.FetchListJob(queryparams)
 	if err != nil {
