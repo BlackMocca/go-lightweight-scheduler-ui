@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/Blackmocca/go-lightweight-scheduler-ui/pages"
 	pageV1 "github.com/Blackmocca/go-lightweight-scheduler-ui/pages/v1"
@@ -56,8 +57,43 @@ var (
 			"/web/resources/fonts/Kanit-Bold.ttf",
 		},
 		// AutoUpdateInterval: time.Duration(30 * time.Second),
+
 	}
 )
+
+func compressdWASM(w http.ResponseWriter, r *http.Request) {
+	encoding := r.Header.Get("Accept-Encoding")
+	if strings.Contains(encoding, "br") {
+		w.Header().Set("Content-Encoding", "br")
+		w.Header().Set("Content-Type", "application/wasm")
+		bu, err := ioutil.ReadFile("./web/app.wasm.br")
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			bu, _ := json.Marshal(map[string]string{"message": err.Error()})
+			w.Write(bu)
+			return
+		}
+		w.Write(bu)
+		return
+	} else if strings.Contains(encoding, "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Type", "application/wasm")
+		bu, err := ioutil.ReadFile("./web/app.wasm.gzip")
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			bu, _ := json.Marshal(map[string]string{"message": err.Error()})
+			w.Write(bu)
+			return
+		}
+		w.Write(bu)
+		return
+	}
+
+	w.WriteHeader(http.StatusNotAcceptable)
+	w.Header().Set("Content-Type", "application/json")
+	bu, _ := json.Marshal(map[string]string{"message": "gzip compression required"})
+	w.Write(bu)
+}
 
 func main() {
 	ctx := context.Background()
@@ -73,18 +109,7 @@ func main() {
 
 	// HTTP routing:
 	http.Handle("/", App)
-	http.HandleFunc("/web/app.wasm", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Encoding", "br")
-		w.Header().Set("Content-Type", "application/wasm")
-		bu, err := ioutil.ReadFile("./web/app.wasm.br")
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			bu, _ := json.Marshal(map[string]string{"message": err.Error()})
-			w.Write(bu)
-			return
-		}
-		w.Write(bu)
-	})
+	http.HandleFunc("/web/app.wasm", compressdWASM)
 
 	start(ctx, port)
 }
