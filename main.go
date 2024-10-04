@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -42,7 +43,7 @@ var (
 			Default: "/web/resources/assets/logo/logo-no-background.png",
 			SVG:     "/web/resources/assets/logo/logo-no-background.svg",
 		},
-		LoadingLabel: "Loading {progress}%",
+		LoadingLabel: "Loading...",
 		Styles: []string{
 			"/web/resources/styles/tailwind/tailwind-min.css",
 			"/web/resources/styles/loading.css",
@@ -57,7 +58,7 @@ var (
 			"/web/resources/fonts/Kanit-Bold.ttf",
 		},
 		// AutoUpdateInterval: time.Duration(30 * time.Second),
-
+		WasmContentLengthHeader: "Content-Length",
 	}
 )
 
@@ -73,6 +74,9 @@ func compressdWASM(w http.ResponseWriter, r *http.Request) {
 			w.Write(bu)
 			return
 		}
+		w.Header().Set("Accept-Ranges", "bytes")
+		w.Header().Set("cache-control", "no-cache")
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", bytes.NewBuffer(bu).Len()))
 		w.Write(bu)
 		return
 	} else if strings.Contains(encoding, "gzip") {
@@ -85,6 +89,9 @@ func compressdWASM(w http.ResponseWriter, r *http.Request) {
 			w.Write(bu)
 			return
 		}
+		w.Header().Set("Accept-Ranges", "bytes")
+		w.Header().Set("cache-control", "no-cache")
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", bytes.NewBuffer(bu).Len()))
 		w.Write(bu)
 		return
 	}
