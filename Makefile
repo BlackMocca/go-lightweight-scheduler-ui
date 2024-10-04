@@ -1,8 +1,9 @@
 build:
 	cd tailwind && tailwindcss -i ./tailwind-min.css -o ../resources/styles/tailwind/tailwind-min.css
 	mkdir -p build/web/resources && cp -r resources build/web
-	GOARCH=wasm GOOS=js go build -o ./build/web/app.wasm main.go
-	go build -o ./build/app main.go
+	GOARCH=wasm GOOS=js go build -ldflags="-s -w" -o ./build/web/app.wasm main.go
+	go build -ldflags="-s -w" -o ./build/app main.go
+	brotli -q 3 --force ./build/web/app.wasm -o ./build/web/app.wasm.br
 
 run:
 	@if lsof -t -i :8080; \
