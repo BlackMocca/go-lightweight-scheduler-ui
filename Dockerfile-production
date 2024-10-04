@@ -34,7 +34,7 @@ RUN wget https://github.com/WebAssembly/binaryen/releases/download/version_119/b
     && tar -xvzf binaryen-version_119-x86_64-linux.tar.gz
 RUN ./binaryen-version_119/bin/wasm-opt -Oz ./build/web/app.wasm -o ./build/web/app.wasm
 RUN brotli -q 11 --force ./build/web/app.wasm -o ./build/web/app.wasm.br
-RUN gzip -q 9 --keep --force ./build/web/app.wasm
+RUN gzip -9 --keep --force ./build/web/app.wasm
 
 FROM alpine:latest 
 RUN apk --no-cache add ca-certificates tzdata
