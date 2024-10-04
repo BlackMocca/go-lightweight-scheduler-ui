@@ -74,9 +74,9 @@ func main() {
 	// HTTP routing:
 	http.Handle("/", App)
 	http.HandleFunc("/web/app.wasm", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Encoding", "br")
 		w.Header().Set("Content-Type", "application/wasm")
-		bu, err := ioutil.ReadFile("./web/app.wasm.gz")
+		bu, err := ioutil.ReadFile("./web/app.wasm.br")
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			bu, _ := json.Marshal(map[string]string{"message": err.Error()})

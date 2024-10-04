@@ -3,7 +3,7 @@ build:
 	mkdir -p build/web/resources && cp -r resources build/web
 	GOARCH=wasm GOOS=js go build -ldflags="-s -w" -o ./build/web/app.wasm main.go
 	go build -ldflags="-s -w" -o ./build/app main.go
-	gzip --keep -9 -f ./build/web/app.wasm
+	brotli -q 3 --force ./build/web/app.wasm -o ./build/web/app.wasm.br
 
 run:
 	@if lsof -t -i :8080; \
