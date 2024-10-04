@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -71,6 +73,18 @@ func main() {
 
 	// HTTP routing:
 	http.Handle("/", App)
+	http.HandleFunc("/web/app.wasm", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Type", "application/wasm")
+		bu, err := ioutil.ReadFile("./web/app.wasm.gz")
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			bu, _ := json.Marshal(map[string]string{"message": err.Error()})
+			w.Write(bu)
+			return
+		}
+		w.Write(bu)
+	})
 
 	start(ctx, port)
 }
