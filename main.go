@@ -43,7 +43,7 @@ var (
 			Default: "/web/resources/assets/logo/logo-no-background.png",
 			SVG:     "/web/resources/assets/logo/logo-no-background.svg",
 		},
-		LoadingLabel: "Loading...",
+		LoadingLabel: "Loading {progress}%",
 		Styles: []string{
 			"/web/resources/styles/tailwind/tailwind-min.css",
 			"/web/resources/styles/loading.css",
